@@ -275,23 +275,29 @@ class Interests extends React.Component {
     }
 
     return false;
-  }
+  };
 
   render() {
+    const {mediaType, interests} = this.props;
+console.log(`Interest: ${mediaType}`)
     return (
       <div className="interests-container">
         <header className='slider-header'>
           <div className='slider-title'>
-            Your Interests
+            Your {mediaType} Interests
           </div>
         </header>
-        <SimpleSlider items={this.props.interests} type={'interests'}/>
+        <SimpleSlider 
+          items={interests} 
+            type={'interests'}
+              mediaType={mediaType} />
       </div>
     );
   }
 }
 
-const msp = state => ({
+const msp = (state, ownProps) => ({
+  mediaType: ownProps.mediaType,
   interests: state.entities.interests,
   genres: state.entities.genres
 });

@@ -8,7 +8,7 @@ import {useDispatch} from 'react-redux';
 
 const Home = () => {
 
-  const [mediaType, setMediaType] = useState("movie");
+  const [mediaType, setMediaType] = useState("Movie");
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ const Home = () => {
   // useEffect(() => {
     
   // }, mediaType);
-
+console.log(mediaType);
 
     return (
       <main className="home-main">

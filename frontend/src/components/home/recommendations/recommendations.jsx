@@ -20,7 +20,7 @@ class Recommendations extends React.Component {
   }
 
   render() {
-    const { lastViewedInterest, type, loading } = this.props;
+    const { mediaType, lastViewedInterest, type, loading } = this.props;
 
     let lastViewedInterestTitle = "";
     let sliderTitle;
@@ -54,21 +54,24 @@ class Recommendations extends React.Component {
     ////////////
     
     return (
-      <div className='recommendations-container'>
-        <section className='recommendations-similar'>
-          <header className='slider-header'>
-            <div className='slider-title'>
-              {sliderTitle}
-            </div>
+      <div className="recommendations-container">
+        <section className="recommendations-similar">
+          <header className="slider-header">
+            <div className="slider-title">{sliderTitle}</div>
           </header>
-          <SimpleSlider items={recommendations} type={'recommendations'} recType={type}/>
+          <SimpleSlider
+            mediaType={mediaType}
+            items={recommendations}
+            type={"recommendations"}
+            recType={type}
+          />
         </section>
       </div>
     );
   }
 }
 
-const msp = state => ({
+const msp = (state, ownProps) => ({
   recommendations: state.entities.recommendations,
   lastViewedInterest: Object.values(state.entities.interests).sort((a,b) => {
     if(a.date > b.date) {
@@ -78,7 +81,8 @@ const msp = state => ({
     }
     return 0;
   }).shift(),
-  loading: state.ui.loading
+  loading: state.ui.loading,
+  mediaType: ownProps.mediaType
 });
 
 const mdp = dispatch => ({

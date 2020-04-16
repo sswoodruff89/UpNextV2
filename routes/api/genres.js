@@ -43,7 +43,9 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
           user: req.user.id,
           name: req.body.genre.name,
           id: req.body.genre.id,
-          count: 1
+          count: 1,
+          movieCount: 1,
+          tvCount: 1
         });
         tierEvaluator(req.user.id, newGenre);
         setTimeout(() => {newGenre.save()
