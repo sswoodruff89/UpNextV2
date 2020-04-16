@@ -29,7 +29,7 @@ class Splash extends React.Component {
   }
 
   handleDemo(e) {
-    this.props.login({ email: "tommy@duek.com", password: "hunter2" }); 
+    this.props.login({ email: "demo@demo.com", password: "anything" }); 
   }
 
   render() {

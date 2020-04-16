@@ -10,6 +10,16 @@ class Nav extends React.Component {
 
     return (
       <nav className="nav-container">
+        <div className="nav-search">
+          <input
+            tabIndex="0"
+            type="text"
+            placeholder="Search..."
+            className="nav-search-input"
+            onClick={() => openModal({ type: "search" })}
+            onFocus={() => openModal({ type: "search" })}
+          />
+        </div>
         <header className="nav-header">
           <div className="nav-logo-container">
             <img
@@ -39,29 +49,32 @@ class Nav extends React.Component {
               alt="logo"
             />
           </div>
+
+          <div className="nav-media-toggle">
+            <button
+              tabIndex="-1"
+              className="about-button"
+            >
+              Movies
+            </button>
+            <button tabIndex="-1" className="logout-button" >
+              TV Shows
+            </button>{" "}
+          </div>
+
           <div className="nav-buttons">
             <button
+              tabIndex="-1"
               className="about-button"
               onClick={() => openModal({ type: "about" })}
             >
               About
             </button>
-            <button className="logout-button" onClick={logout}>
+            <button tabIndex="-1" className="logout-button" onClick={logout}>
               Logout
             </button>
-
           </div>
         </header>
-
-        <div className="nav-search">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="nav-search-input"
-            onClick={() => openModal({ type: "search" })}
-            onFocus={() => openModal({ type: "search" })}
-          />
-        </div>
       </nav>
     );
   }

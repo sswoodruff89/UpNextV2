@@ -46,6 +46,10 @@ class Interests extends React.Component {
       let promiseCExpected = 10;
       let promiseDExpected = 10;
       // Pull out random 3 superLiked-tier genres, joined by AND
+
+      // console.time("allRec");
+      // console.log(".................................");
+
       TMDBAPIUtil.getAllRecommendations(mixLikeArr)
         .then(response => {
           const promisesA = [];
@@ -62,6 +66,9 @@ class Interests extends React.Component {
               })
             );
           }
+
+      // console.timeEnd("allRec");
+      // console.log(".................................");
 
           Promise.all(promisesA)
             .then(() => {
