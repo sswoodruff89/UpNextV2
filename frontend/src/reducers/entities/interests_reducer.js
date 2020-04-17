@@ -1,15 +1,26 @@
-import { RECEIVE_INTERESTS, RECEIVE_NEW_INTEREST, REMOVE_INTEREST } from '../../actions/interest_actions';
+import {
+  RECEIVE_INTERESTS,
+  RECEIVE_MOVIE_INTERESTS,
+  RECEIVE_TV_INTERESTS,
+  RECEIVE_NEW_INTEREST,
+  REMOVE_INTEREST,
+} from "../../actions/interest_actions";
 import { RECEIVE_USER_LOGOUT } from '../../actions/session_actions';
 
 const InterestsReducer = (state = {}, action) => {
   Object.freeze(state);
   let newState = Object.assign({}, state);
+  
   switch(action.type) {
     case RECEIVE_INTERESTS:
       action.interests.data.forEach((interest, idx) => {
         newState[action.interests.data[idx].movieId] = interest;
       });
       return newState;
+    // case RECEIVE_MOVIE_INTERESTS:
+    //   newState[action.mediaType.toLowerCase()] = {};
+    //   Object.values(action.)
+
     case RECEIVE_NEW_INTEREST:
       newState[action.interest.data.movieId] = action.interest.data;
       return newState;

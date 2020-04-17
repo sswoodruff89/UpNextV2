@@ -9,6 +9,7 @@ export const fetchGenres = () => {
 // }
 
 export const createGenre = data => {
+
   return axios.post("/api/genres", data);
 };
 
@@ -16,6 +17,9 @@ export const createGenre = data => {
 //   return axios.patch("/api/genres", data);
 // };
 
-export const updateGenre = (genreId, value, mediaType) => {
-  return axios.patch(`/api/genres/${genreId}`, value, mediaType);
+export const updateGenre = (genreId, data) => {
+  return axios.patch(`/api/genres/${genreId}`, data);
 };
+// export const updateGenre = (genreId, value, mediaType) => {
+//   return axios.patch(`/api/genres/${genreId}`, value, mediaType);
+// };

@@ -80,6 +80,12 @@ class Nav extends React.Component {
   }
 }
 
+// const msp = state => {
+//   return {
+//     mediaType: state.ui.mo
+//   }
+// }
+
 const mdp = dispatch => ({
   logout: () => dispatch(logout()),
   openModal: modal => dispatch(openModal(modal))

@@ -279,7 +279,7 @@ class Interests extends React.Component {
 
   render() {
     const {mediaType, interests} = this.props;
-console.log(`Interest: ${mediaType}`)
+
     return (
       <div className="interests-container">
         <header className='slider-header'>
@@ -297,7 +297,7 @@ console.log(`Interest: ${mediaType}`)
 }
 
 const msp = (state, ownProps) => ({
-  mediaType: ownProps.mediaType,
+  mediaType: state.ui.mediaType,
   interests: state.entities.interests,
   genres: state.entities.genres
 });

@@ -46,14 +46,39 @@ class Search extends React.Component {
   }
 
   makeDebouncedSearch(keyword) {
-    TMDBAPIUtil.getMovieSuggestions(keyword)
-      .then(response => {
+    if (this.props.mediaType === "Movie") {
+      TMDBAPIUtil.getMovieSuggestions(keyword)
+        .then(response => {
+          let searchResults = response.data.results;
+          
+          // Removes any search results that are missing metadata like date or poster
+          let sanitizedResults = searchResults.reduce((store, entry) => {
+  
+            if (!Object.values(entry).some(field => field === null) && !this.props.movieIds[entry.id]) {
+              store.push(entry);
+            }
+            return store;
+          }, []);
+  
+          if (!isEmpty(sanitizedResults)) {
+            sanitizedResults = sanitizedResults.slice(0, 10);
+          }
+  
+          this.setState({
+            searchResults: sanitizedResults
+          });
+        });
+
+    } else if (this.props.mediaType === "TVShow") {
+      TMDBAPIUtil.getTVShowSuggestions(keyword).then((response) => {
         let searchResults = response.data.results;
-        
+
         // Removes any search results that are missing metadata like date or poster
         let sanitizedResults = searchResults.reduce((store, entry) => {
-
-          if (!Object.values(entry).some(field => field === null) && !this.props.movieIds[entry.id]) {
+          if (
+            !Object.values(entry).some((field) => field === null) &&
+            !this.props.movieIds[entry.id]
+          ) {
             store.push(entry);
           }
           return store;
@@ -64,9 +89,11 @@ class Search extends React.Component {
         }
 
         this.setState({
-          searchResults: sanitizedResults
+          searchResults: sanitizedResults,
         });
       });
+    }
+
   }
 
   // first make a call to omdb to get the full interest info
@@ -75,18 +102,20 @@ class Search extends React.Component {
   handleClick(id) {
     return e => {
       e.preventDefault();
+      const {createInterest, updateGenre, createGenre, mediaType} = this.props;
 
       TMDBAPIUtil.getMovieInfo(id)
         .then(response => {
           if (TMDBAPIUtil.hasValidMovieFields(response.data)) {
-             Promise.all([this.props.createInterest(response.data)]).then(() => {
+             Promise.all([createInterest(response.data)]).then(() => {
               // genres calculation
-              const { genres, movieIds } = this.props;
+              const { genres, movieIds, mediaType } = this.props;
               response.data.genres.forEach(genre => {
                 if (genres[genre.name]) {
-                  this.props.updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(movieIds).length});
+                  updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(movieIds).length, mediaType});
                 } else {
-                  this.props.createGenre({genre, interestCount: Object.keys(movieIds).length} );
+                  // createGenre({genre, mediaType} );
+                  this.props.createGenre({genre, mediaType, interestCount: Object.keys(movieIds).length} );
                 }
               });
               this.props.closeModal();
@@ -165,6 +194,9 @@ class Search extends React.Component {
 
 const msp = state => {
   let movieIdObj = {};
+  let tvIdObj = {};
+  let mediaType = state.ui.mediaType;
+  let mt = (mediaType === "Movie") ? "movie" : "tv";
 
   if (!isEmpty(state.entities.interests)) {
     for (let key in state.entities.interests) {
@@ -175,7 +207,8 @@ const msp = state => {
     return {
       genres: state.entities.genres,
       interests: state.entities.interests,
-      movieIds: movieIdObj
+      movieIds: movieIdObj,
+      mediaType
     };
 }
 
@@ -184,7 +217,7 @@ const mdp = dispatch => ({
   createSimilarRecommendations: data => dispatch(createSimilarRecommendations(data)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   createGenre: data => dispatch(createGenre(data)),
-  updateGenre: (genreId, value) => dispatch(updateGenre(genreId, value))
+  updateGenre: (genreId, value, mediaType) => dispatch(updateGenre(genreId, value, mediaType))
 });
 
 export default connect(msp, mdp)(Search);

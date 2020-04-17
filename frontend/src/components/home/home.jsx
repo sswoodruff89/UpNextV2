@@ -23,7 +23,7 @@ const Home = () => {
   // useEffect(() => {
     
   // }, mediaType);
-console.log(mediaType);
+
 
     return (
       <main className="home-main">
