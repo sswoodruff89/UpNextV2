@@ -296,11 +296,14 @@ class Interests extends React.Component {
   }
 }
 
-const msp = (state, ownProps) => ({
-  mediaType: state.ui.mediaType,
-  interests: state.entities.interests,
-  genres: state.entities.genres
-});
+const msp = (state, ownProps) => {
+  let mediaType = state.ui.mediaType;
+  return {
+    interests: state.entities.interests[`${mediaType.toLowerCase()}s`],
+    genres: state.entities.genres,
+    mediaType
+  }
+};
 
 const mdp = dispatch => ({
   fetchInterests: () => dispatch(fetchInterests()),

@@ -21,9 +21,10 @@ export const receiveNewInterest = (interest, mediaType) => ({
   mediaType
 });
 
-export const removeInterest = interestId => ({
+export const removeInterest = (interestId, mediaType) => ({
   type: REMOVE_INTEREST,
-  interestId
+  interestId,
+  mediaType
 });
 
 export const fetchInterests = (mediaType) => dispatch => (
@@ -44,7 +45,7 @@ export const createInterest = (data, mediaType) => dispatch => {
 }
  
 
-export const deleteInterest = interestId => dispatch => {
+export const deleteInterest = (interestId, mediaType) => dispatch => {
   // dispatch(startLoadingAll());
   // setTimeout(() => {
   //   dispatch(endLoadingAll());

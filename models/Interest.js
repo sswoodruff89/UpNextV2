@@ -23,6 +23,10 @@ const InterestSchema = new Schema({
     type: String,
     required: true
   },
+  mediaId: {
+    type: Number,
+    required: true
+  },
   movieId: {
     type: Number,
     required: true

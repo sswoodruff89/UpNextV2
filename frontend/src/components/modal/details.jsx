@@ -41,12 +41,13 @@ class Details extends React.Component {
     this.props.detailsItem.poster_path = this.props.detailsItem.poster;
     this.props.detailsItem.vote_average = this.props.detailsItem.voteAverage;
     this.props.detailsItem.vote_count = this.props.detailsItem.voteCount;
+    this.props.detailsItem.type = this.props.mediaType.toLowerCase();
 
 
     Promise.all([this.props.createInterest(this.props.detailsItem, this.props.mediaType)]).then(() => {
       // genres calculation
       const {updateGenre, createGenre, genres, detailsItem, mediaType } = this.props;
-      
+
       detailsItem.genres.forEach(genre => {
         if (genres[genre.name]) {
           updateGenre(genres[genre.name]._id, { value: 1, mediaType });
@@ -88,7 +89,7 @@ class Details extends React.Component {
     e.preventDefault();
 
     const localGenres = this.props.detailsItem.genres;
-    Promise.all([this.props.deleteInterest(this.props.detailsItem._id)]).then(() => {
+    Promise.all([this.props.deleteInterest(this.props.detailsItem._id, this.props.detailsItem.type )]).then(() => {
       // genres calculation
       const { genres, detailsItem, mediaType} = this.props;
       localGenres.forEach(name => {

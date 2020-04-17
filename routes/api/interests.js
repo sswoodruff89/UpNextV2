@@ -18,11 +18,12 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
         } else {
           const newInterest = new Interest({
             user: req.user.id,
+            mediaId: req.body.id,
             movieId: req.body.id,
             title: req.body.title,
             year: req.body.release_date,
             genres: req.body.genres,
-            type: "movie",
+            type: req.body.type,
             poster: req.body.poster_path,
             overview: req.body.overview,
             runtime: req.body.runtime,
