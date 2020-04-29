@@ -11,11 +11,16 @@ const isEmpty = require("lodash.isempty");
 
 class Interests extends React.Component {
   componentDidMount() {
-    this.props.fetchInterests();
+
+    this.props.fetchInterests(this.props.mediaType);
   }
 
   componentDidUpdate(prevProps) {
     // can check if interests have changed
+    ///////
+    //Store recommendations to shorten runtime?
+    ///
+    ////
     if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
       const { genres, interests } = this.props;
       Object.values(genres).forEach(genre => {
@@ -46,6 +51,10 @@ class Interests extends React.Component {
       let promiseCExpected = 10;
       let promiseDExpected = 10;
       // Pull out random 3 superLiked-tier genres, joined by AND
+
+      // console.time("allRec");
+      // console.log(".................................");
+
       TMDBAPIUtil.getAllRecommendations(mixLikeArr)
         .then(response => {
           const promisesA = [];
@@ -268,29 +277,39 @@ class Interests extends React.Component {
     }
 
     return false;
-  }
+  };
 
   render() {
+    const {mediaType, interests} = this.props;
+    let banner = mediaType[0].toUpperCase() + mediaType.slice(1);
+
     return (
       <div className="interests-container">
         <header className='slider-header'>
           <div className='slider-title'>
-            Your Interests
+            Your {banner} Interests
           </div>
         </header>
-        <SimpleSlider items={this.props.interests} type={'interests'}/>
+        <SimpleSlider 
+          items={interests} 
+            type={'interests'}
+              mediaType={mediaType} />
       </div>
     );
   }
 }
 
-const msp = state => ({
-  interests: state.entities.interests,
-  genres: state.entities.genres
-});
+const msp = (state, ownProps) => {
+  let mediaType = state.ui.mediaType;
+  return {
+    interests: state.entities.interests[`${mediaType.toLowerCase()}s`],
+    genres: state.entities.genres,
+    mediaType
+  }
+};
 
 const mdp = dispatch => ({
-  fetchInterests: () => dispatch(fetchInterests()),
+  fetchInterests: (type) => dispatch(fetchInterests(type)),
   updateGenre: (genreId,value) => dispatch(updateGenre(genreId,value)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   deleteAllRecommendations: () => dispatch(deleteAllRecommendations()),

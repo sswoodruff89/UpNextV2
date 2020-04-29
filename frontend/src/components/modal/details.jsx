@@ -41,33 +41,21 @@ class Details extends React.Component {
     this.props.detailsItem.poster_path = this.props.detailsItem.poster;
     this.props.detailsItem.vote_average = this.props.detailsItem.voteAverage;
     this.props.detailsItem.vote_count = this.props.detailsItem.voteCount;
+    this.props.detailsItem.type = this.props.mediaType;
 
-    // this.props.createInterest(this.props.detailsItem);
 
-    // setTimeout(() => {
-    //   // genres calculation
-    //   const {genres, detailsItem} = this.props;
-    //   detailsItem.genres.forEach(genre => {
-    //     if (genres[genre.name]) {
-    //       this.props.updateGenre(genres[genre.name]._id, {value:1});
+    Promise.all([this.props.createInterest(this.props.detailsItem)]).then(() => {
+      // genres calculation
+      const {updateGenre, createGenre, genres, detailsItem, mediaType } = this.props;
 
-    //     } else {
-    //       this.props.createGenre(genre);
-    //     }
-    //   });
-    // }, 30);
-
-      Promise.all([this.props.createInterest(this.props.detailsItem)]).then(() => {
-        // genres calculation
-        const { genres, detailsItem } = this.props;
-        detailsItem.genres.forEach(genre => {
-          if (genres[genre.name]) {
-            this.props.updateGenre(genres[genre.name]._id, { value: 1 });
-          } else {
-            this.props.createGenre({ genre });
-          }
-        });
+      detailsItem.genres.forEach(genre => {
+        if (genres[genre.name]) {
+          updateGenre(genres[genre.name]._id, { value: 1, mediaType });
+        } else {
+          createGenre({ genre, mediaType });
+        }
       });
+    });
 
     // May refactor in the future so that recommendations are made only after and if createInterest and closeModal are successful
     TMDBAPIUtil.getSimilarRecommendations(id).then(response => {
@@ -76,12 +64,14 @@ class Details extends React.Component {
 
       const promises = response.data.results.map(recommendation => {
         let recId = recommendation.id;
-        return TMDBAPIUtil.getMovieInfo(recId).then(movie => {
-          if (!this.props.movieIds[movie.data.id]) {
+        return TMDBAPIUtil.getMovieInfo(recId).then(media => {
+          if (!this.props.mediaIds[media.data.id]) {
             count += 1;
 
-            recommendation.genres = movie.data.genres;
-            recommendation.runtime = movie.data.runtime;
+            recommendation.genres = media.data.genres;
+            recommendation.runtime = media.data.runtime;
+
+            //////REVISE///////
             recommendation.similarMovieId = id;
 
             recommendations.push(recommendation);
@@ -95,88 +85,24 @@ class Details extends React.Component {
         this.props.closeModal();
       });
     });
-
-    // TMDBAPIUtil.getAllRecommendations()
-    //   .then(response => {
-    //     let count = 0;
-    //     let recommendations = [];
-
-    //     const promises = response.data.results.map((recommendation) => {
-    //       let recId = recommendation.id;
-    //       return TMDBAPIUtil.getMovieInfo(recId)
-    //         .then(movie => {
-    //           if (!this.props.movieIds[movie.data.id]) {
-    //             count += 1;
-
-    //             recommendation.genres = movie.data.genres;
-    //             recommendation.runtime = movie.data.runtime;
-
-    //             recommendations.push(recommendation);
-    //             if (count === 15) this.props.closeModal();
-    //           }
-    //         });
-    //     });
-
-    //     Promise.all(promises)
-    //       .then(() => {
-    //         this.props.createAllRecommendations(recommendations);
-    //         this.props.closeModal();
-    //       });
-    //   });
   }
 
   removeFromInterests(e) {
     e.preventDefault();
-    // let genres = this.props.detailsItem.genres;
-    // this.props.deleteInterest( this.props.detailsItem._id );
 
-    // setTimeout(() => {
-    //   genres.forEach(name=> {
-    //     this.props.updateGenre(this.props.genres[name]._id, {value:-1});
-    //   });
-    //   this.props.fetchSimilarRecommendations();
-    //   this.props.closeModal();
-    // }, 30);
     const localGenres = this.props.detailsItem.genres;
-
-    Promise.all([this.props.deleteInterest(this.props.detailsItem._id)]).then(() => {
+    // Promise.all([this.props.deleteInterest({ this.props.detailsItem._id, this.props.detailsItem.type } )]).then(() => {
+    Promise.all([this.props.deleteInterest(this.props.detailsItem)]).then(() => {
       // genres calculation
-      const { genres, detailsItem } = this.props;
+      const { genres, detailsItem, mediaType} = this.props;
       localGenres.forEach(name => {
-        this.props.updateGenre(genres[name]._id, { value: -1 });
+        this.props.updateGenre(genres[name]._id, { value: -1, mediaType });
       });
 
       this.props.fetchSimilarRecommendations();
       this.props.closeModal();
     });
 
-    // TMDBAPIUtil.getAllRecommendations()
-    //   .then(response => {
-    //     let count = 0;
-    //     let recommendations = [];
-
-    //     const promises = response.data.results.map((recommendation) => {
-    //       let recId = recommendation.id;
-    //       return TMDBAPIUtil.getMovieInfo(recId)
-    //         .then(movie => {
-    //           if (!this.props.movieIds[movie.data.id]) {
-    //             count += 1;
-
-    //             recommendation.genres = movie.data.genres;
-    //             recommendation.runtime = movie.data.runtime;
-
-    //             recommendations.push(recommendation);
-    //             if (count === 15) this.props.closeModal();
-    //           }
-    //         });
-    //     });
-
-    //     Promise.all(promises)
-    //       .then(() => {
-    //         this.props.createAllRecommendations(recommendations);
-    //         this.props.closeModal();
-    //       });
-    //   });
   }
 
   handleDate(date) {
@@ -287,27 +213,29 @@ class Details extends React.Component {
 
 const msp = (state, ownProps) => {
   let detailsItem;
+  let mediaType = state.ui.mediaType;
   if (ownProps.detailsType === "recommendations") {
     detailsItem = state.entities[ownProps.detailsType][ownProps.detailsRecType][ownProps.detailsId];
   } else {
-    detailsItem = state.entities[ownProps.detailsType][ownProps.detailsId];
+    detailsItem = state.entities[ownProps.detailsType][`${mediaType}s`][ownProps.detailsId];
   }
 
-  let movieIdObj = {};
+  let mediaIdObj = {};
     ///refactor after algorithm
-
-   if (!isEmpty(state.entities.interests)) {
-    for (let key in state.entities.interests) {
-      let movieId = state.entities.interests[key].movieId;
-      movieIdObj[movieId] = true;
+  if (!isEmpty(state.entities.interests)) {
+    for (let key in state.entities.interests[`${mediaType}s`]) {
+      let mediaId = state.entities.interests[`${mediaType}s`][key].mediaId;
+      mediaIdObj[mediaId] = true;
     }
-  }
+  };
+
   return {
     detailsItem, 
     genres: state.entities.genres,
-    movieIds: movieIdObj
-  }
-}
+    mediaIds: mediaIdObj,
+    mediaType
+  };
+};
 
 const mdp = dispatch => ({
   createInterest: data => dispatch(createInterest(data)),
@@ -315,7 +243,7 @@ const mdp = dispatch => ({
   fetchSimilarRecommendations: data => dispatch(fetchSimilarRecommendations(data)),
   createSimilarRecommendations: data => dispatch(createSimilarRecommendations(data)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
-  updateGenre: (genreId,value) => dispatch(updateGenre(genreId,value)),
+  updateGenre: (genreId, value, mediaType) => dispatch(updateGenre(genreId, value, mediaType)),
   createGenre: genre => dispatch(createGenre(genre))
 });
 

@@ -1,60 +1,62 @@
-
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const InterestSchema = new Schema({
+const TVInterestSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
-    ref: 'User'
+    ref: "User",
   },
   title: {
     type: String,
-    required: true
+    required: true,
   },
   type: {
     type: String,
-    required: true
+    required: true,
   },
   poster: {
     type: String,
-    required: true
+    required: true,
   },
   year: {
     type: String,
-    required: true
+    required: true,
   },
   mediaId: {
     type: Number,
-    required: true
+    required: true,
   },
-  movieId: {
+  tvId: {
     type: Number,
-    required: true
+    // required: true,
   },
   date: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   overview: {
     type: String,
-    required: true
+    required: true,
   },
-  runtime: {
+  seasons: {
     type: Number,
-    required: true
+    required: true,
   },
   voteAverage: {
     type: Number,
-    required: true
+    required: true,
   },
   voteCount: {
     type: Number,
-    required: true
+    required: true,
   },
   genres: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
 });
 
-module.exports = Interest = mongoose.model('Interest', InterestSchema)
+module.exports = TVInterest = mongoose.model(
+  "TVInterest",
+  TVInterestSchema
+);

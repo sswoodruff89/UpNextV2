@@ -46,14 +46,40 @@ class Search extends React.Component {
   }
 
   makeDebouncedSearch(keyword) {
-    TMDBAPIUtil.getMovieSuggestions(keyword)
-      .then(response => {
+    if (this.props.mediaType === "movie") {
+      TMDBAPIUtil.getMovieSuggestions(keyword)
+        .then(response => {
+
+          let searchResults = response.data.results;
+          
+          // Removes any search results that are missing metadata like date or poster
+          let sanitizedResults = searchResults.reduce((store, entry) => {
+  
+            if (!Object.values(entry).some(field => field === null) && !this.props.mediaIds[entry.id]) {
+              store.push(entry);
+            }
+            return store;
+          }, []);
+  
+          if (!isEmpty(sanitizedResults)) {
+            sanitizedResults = sanitizedResults.slice(0, 10);
+          }
+  
+          this.setState({
+            searchResults: sanitizedResults
+          });
+        });
+
+    } else if (this.props.mediaType === "tv") {
+      TMDBAPIUtil.getTVShowSuggestions(keyword).then((response) => {
         let searchResults = response.data.results;
-        
+
         // Removes any search results that are missing metadata like date or poster
         let sanitizedResults = searchResults.reduce((store, entry) => {
-
-          if (!Object.values(entry).some(field => field === null) && !this.props.movieIds[entry.id]) {
+          if (
+            !Object.values(entry).some((field) => field === null) &&
+            !this.props.mediaIds[entry.id]
+          ) {
             store.push(entry);
           }
           return store;
@@ -64,9 +90,11 @@ class Search extends React.Component {
         }
 
         this.setState({
-          searchResults: sanitizedResults
+          searchResults: sanitizedResults,
         });
       });
+    }
+
   }
 
   // first make a call to omdb to get the full interest info
@@ -75,18 +103,21 @@ class Search extends React.Component {
   handleClick(id) {
     return e => {
       e.preventDefault();
+      const {createInterest, updateGenre, createGenre, mediaType} = this.props;
 
       TMDBAPIUtil.getMovieInfo(id)
         .then(response => {
+          response.data.type = mediaType;
           if (TMDBAPIUtil.hasValidMovieFields(response.data)) {
-             Promise.all([this.props.createInterest(response.data)]).then(() => {
+             Promise.all([createInterest(response.data, mediaType)]).then(() => {
               // genres calculation
-              const { genres, movieIds } = this.props;
+              const { genres, mediaIds, mediaType } = this.props;
               response.data.genres.forEach(genre => {
                 if (genres[genre.name]) {
-                  this.props.updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(movieIds).length});
+                  updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(mediaIds).length, mediaType});
                 } else {
-                  this.props.createGenre({genre, interestCount: Object.keys(movieIds).length} );
+                  // createGenre({genre, mediaType} );
+                  this.props.createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
                 }
               });
               this.props.closeModal();
@@ -101,17 +132,19 @@ class Search extends React.Component {
         .then(response => {
           let count = 0;
           let recommendations = [];
+          let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
 
           const promises = response.data.results.map((recommendation) => {
             let recId = recommendation.id;
             return TMDBAPIUtil.getMovieInfo(recId)
-              .then(movie => {
-                if (!this.props.movieIds[movie.data.id]) {
+              .then(media => {
+                if (!this.props.mediaIds[media.data.id]) {
                   count += 1;
 
-                  recommendation.genres = movie.data.genres;
-                  recommendation.runtime = movie.data.runtime;
-                  recommendation.similarMovieId = id;
+                  recommendation.genres = media.data.genres;
+                  recommendation.runtime = media.data.runtime;
+                  ////REVISE
+                  recommendation[`similar${type}Id`] = id;
 
                   recommendations.push(recommendation);
                   if (count === 15) this.props.closeModal();
@@ -164,18 +197,22 @@ class Search extends React.Component {
 }
 
 const msp = state => {
-  let movieIdObj = {};
+  let mediaIdObj = {};
+  let tvIdObj = {};
+  let mediaType = state.ui.mediaType;
+  // let mt = (mediaType === "Movie") ? "movie" : "tv";
 
   if (!isEmpty(state.entities.interests)) {
-    for (let key in state.entities.interests) {
-      let movieId = state.entities.interests[key].movieId;
-      movieIdObj[movieId] = true;
+    for (let key in state.entities.interests[`${mediaType}s`]) {
+      let mediaId = state.entities.interests[`${mediaType}s`][key].mediaId;
+      mediaIdObj[mediaId] = true;
     }
   }
     return {
       genres: state.entities.genres,
       interests: state.entities.interests,
-      movieIds: movieIdObj
+      mediaIds: mediaIdObj,
+      mediaType
     };
 }
 
@@ -184,7 +221,7 @@ const mdp = dispatch => ({
   createSimilarRecommendations: data => dispatch(createSimilarRecommendations(data)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   createGenre: data => dispatch(createGenre(data)),
-  updateGenre: (genreId, value) => dispatch(updateGenre(genreId, value))
+  updateGenre: (genreId, value, mediaType) => dispatch(updateGenre(genreId, value, mediaType))
 });
 
 export default connect(msp, mdp)(Search);

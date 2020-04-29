@@ -12,6 +12,10 @@ export const getMovieInfo = function(id) {
   return instance.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}`);
 };
 
+export const getTVInfo = function(id) {
+  return instance.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${tmdbApiKey}`)
+}
+
 export const getSimilarRecommendations = function(id) {
   return instance.get(`https://api.themoviedb.org/3/movie/${id}/similar?api_key=${tmdbApiKey}`);
 };
@@ -57,6 +61,12 @@ export const getMovieSuggestions = function(keyword) {
     .get(`https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${keyword}&include_adult=false`);
 };
 
+export const getTVShowSuggestions = function(keyword) {
+  return instance.get(
+    `https://api.themoviedb.org/3/search/tv?api_key=${tmdbApiKey}&query=${keyword}&include_adult=false`
+  );
+}
+
 // 1. first check if user.preferences.high.length > 3
 //    - shuffle the array, then pick the first 3 high's
 
@@ -79,5 +89,18 @@ export const hasValidMovieFields = movie => {
   if (movie.runtime === null) return false;
   if (movie.genres === null || movie.genres.length === 0) return false;
   if (movie.overview === "" || movie.overview === null) return false;
+  return true;
+}
+
+export const hasValidTVFields = tvShow => {
+  if (tvShow.name === "" || tvShow.name === null) return false;
+  if (tvShow.poster_path === "" || tvShow.poster_path === null) return false;
+  if (tvShow.vote_average === null) return false;
+  if (tvShow.vote_count === null) return false;
+  if (tvShow.seasons === null || tvShow.seasons.length === 0) return false;
+  if (tvShow.first_air_date === "" || tvShow.first_air_date === null) return false;
+  if (tvShow.runtime === null) return false;
+  if (tvShow.genres === null || tvShow.genres.length === 0) return false;
+  if (tvShow.overview === "" || tvShow.overview === null) return false;
   return true;
 }

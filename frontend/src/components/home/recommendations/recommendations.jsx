@@ -20,7 +20,7 @@ class Recommendations extends React.Component {
   }
 
   render() {
-    const { lastViewedInterest, type, loading } = this.props;
+    const { mediaType, lastViewedInterest, type, loading } = this.props;
 
     let lastViewedInterestTitle = "";
     let sliderTitle;
@@ -54,32 +54,40 @@ class Recommendations extends React.Component {
     ////////////
     
     return (
-      <div className='recommendations-container'>
-        <section className='recommendations-similar'>
-          <header className='slider-header'>
-            <div className='slider-title'>
-              {sliderTitle}
-            </div>
+      <div className="recommendations-container">
+        <section className="recommendations-similar">
+          <header className="slider-header">
+            <div className="slider-title">{sliderTitle}</div>
           </header>
-          <SimpleSlider items={recommendations} type={'recommendations'} recType={type}/>
+          <SimpleSlider
+            mediaType={mediaType}
+            items={recommendations}
+            type={"recommendations"}
+            recType={type}
+          />
         </section>
       </div>
     );
   }
 }
 
-const msp = state => ({
-  recommendations: state.entities.recommendations,
-  lastViewedInterest: Object.values(state.entities.interests).sort((a,b) => {
-    if(a.date > b.date) {
-      return -1;
-    } else if (a.date < b.date){
-      return 1;
-    }
-    return 0;
-  }).shift(),
-  loading: state.ui.loading
-});
+const msp = (state, ownProps) => {
+  let mediaType = state.ui.mediaType;
+
+  return {
+    recommendations: state.entities.recommendations,
+    lastViewedInterest: Object.values(state.entities.interests[`${mediaType}s`]).sort((a,b) => {
+      if(a.date > b.date) {
+        return -1;
+      } else if (a.date < b.date){
+        return 1;
+      }
+      return 0;
+    }).shift(),
+    loading: state.ui.loading,
+    mediaType
+  }
+};
 
 const mdp = dispatch => ({
   fetchGenres: () => dispatch(fetchGenres()),

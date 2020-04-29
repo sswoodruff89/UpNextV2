@@ -39,11 +39,17 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
       if (genre) {
         return res.status(400).json({ title: "You have already added this genre" });
       } else {
+
+        const tvCount = (req.body.mediaType === 'tv') ? 1 : 0;
+        const movieCount = (req.body.mediaType === 'movie') ? 1 : 0;
+
         const newGenre = new Genre({
           user: req.user.id,
           name: req.body.genre.name,
           id: req.body.genre.id,
-          count: 1
+          count: 1,
+          movieCount,
+          tvCount
         });
         tierEvaluator(req.user.id, newGenre);
         setTimeout(() => {newGenre.save()
@@ -61,7 +67,10 @@ router.patch("/:genreId", passport.authenticate('jwt', { session: false }), (req
       if (!genre) {
         return res.status(400).json({ title: "No genre found" });
       } else {
-        genre.count += req.body.value;
+        
+        const {value, mediaType} = req.body;
+        genre.count += value;
+        (mediaType === "movie") ? genre.movieCount += value : genre.tvCount += value;
 
       Promise.all([tierEvaluator(req.user.id, genre, req.body.interestCount)]).then(() => {
         genre.save()

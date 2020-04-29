@@ -18,6 +18,14 @@ const GenreSchema = new Schema({
     type: Number,
     required: true
   },
+  movieCount: {
+    type: Number,
+    required: true
+  },
+  tvCount: {
+    type: Number,
+    required: true
+  },
   date: {
     type: Date,
     default: Date.now
