@@ -11,11 +11,16 @@ const isEmpty = require("lodash.isempty");
 
 class Interests extends React.Component {
   componentDidMount() {
-    this.props.fetchInterests();
+
+    this.props.fetchInterests(this.props.mediaType);
   }
 
   componentDidUpdate(prevProps) {
     // can check if interests have changed
+    ///////
+    //Store recommendations to shorten runtime?
+    ///
+    ////
     if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
       const { genres, interests } = this.props;
       Object.values(genres).forEach(genre => {
@@ -66,9 +71,6 @@ class Interests extends React.Component {
               })
             );
           }
-
-      // console.timeEnd("allRec");
-      // console.log(".................................");
 
           Promise.all(promisesA)
             .then(() => {
@@ -279,12 +281,13 @@ class Interests extends React.Component {
 
   render() {
     const {mediaType, interests} = this.props;
+    let banner = mediaType[0].toUpperCase() + mediaType.slice(1);
 
     return (
       <div className="interests-container">
         <header className='slider-header'>
           <div className='slider-title'>
-            Your {mediaType} Interests
+            Your {banner} Interests
           </div>
         </header>
         <SimpleSlider 
@@ -306,7 +309,7 @@ const msp = (state, ownProps) => {
 };
 
 const mdp = dispatch => ({
-  fetchInterests: () => dispatch(fetchInterests()),
+  fetchInterests: (type) => dispatch(fetchInterests(type)),
   updateGenre: (genreId,value) => dispatch(updateGenre(genreId,value)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   deleteAllRecommendations: () => dispatch(deleteAllRecommendations()),

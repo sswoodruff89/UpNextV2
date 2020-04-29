@@ -46,15 +46,16 @@ class Search extends React.Component {
   }
 
   makeDebouncedSearch(keyword) {
-    if (this.props.mediaType === "Movie") {
+    if (this.props.mediaType === "movie") {
       TMDBAPIUtil.getMovieSuggestions(keyword)
         .then(response => {
+
           let searchResults = response.data.results;
           
           // Removes any search results that are missing metadata like date or poster
           let sanitizedResults = searchResults.reduce((store, entry) => {
   
-            if (!Object.values(entry).some(field => field === null) && !this.props.movieIds[entry.id]) {
+            if (!Object.values(entry).some(field => field === null) && !this.props.mediaIds[entry.id]) {
               store.push(entry);
             }
             return store;
@@ -69,7 +70,7 @@ class Search extends React.Component {
           });
         });
 
-    } else if (this.props.mediaType === "TVShow") {
+    } else if (this.props.mediaType === "tv") {
       TMDBAPIUtil.getTVShowSuggestions(keyword).then((response) => {
         let searchResults = response.data.results;
 
@@ -77,7 +78,7 @@ class Search extends React.Component {
         let sanitizedResults = searchResults.reduce((store, entry) => {
           if (
             !Object.values(entry).some((field) => field === null) &&
-            !this.props.movieIds[entry.id]
+            !this.props.mediaIds[entry.id]
           ) {
             store.push(entry);
           }
@@ -106,16 +107,17 @@ class Search extends React.Component {
 
       TMDBAPIUtil.getMovieInfo(id)
         .then(response => {
+          response.data.type = mediaType;
           if (TMDBAPIUtil.hasValidMovieFields(response.data)) {
-             Promise.all([createInterest(response.data)]).then(() => {
+             Promise.all([createInterest(response.data, mediaType)]).then(() => {
               // genres calculation
-              const { genres, movieIds, mediaType } = this.props;
+              const { genres, mediaIds, mediaType } = this.props;
               response.data.genres.forEach(genre => {
                 if (genres[genre.name]) {
-                  updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(movieIds).length, mediaType});
+                  updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(mediaIds).length, mediaType});
                 } else {
                   // createGenre({genre, mediaType} );
-                  this.props.createGenre({genre, mediaType, interestCount: Object.keys(movieIds).length} );
+                  this.props.createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
                 }
               });
               this.props.closeModal();
@@ -130,17 +132,19 @@ class Search extends React.Component {
         .then(response => {
           let count = 0;
           let recommendations = [];
+          let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
 
           const promises = response.data.results.map((recommendation) => {
             let recId = recommendation.id;
             return TMDBAPIUtil.getMovieInfo(recId)
-              .then(movie => {
-                if (!this.props.movieIds[movie.data.id]) {
+              .then(media => {
+                if (!this.props.mediaIds[media.data.id]) {
                   count += 1;
 
-                  recommendation.genres = movie.data.genres;
-                  recommendation.runtime = movie.data.runtime;
-                  recommendation.similarMovieId = id;
+                  recommendation.genres = media.data.genres;
+                  recommendation.runtime = media.data.runtime;
+                  ////REVISE
+                  recommendation[`similar${type}Id`] = id;
 
                   recommendations.push(recommendation);
                   if (count === 15) this.props.closeModal();
@@ -193,21 +197,21 @@ class Search extends React.Component {
 }
 
 const msp = state => {
-  let movieIdObj = {};
+  let mediaIdObj = {};
   let tvIdObj = {};
   let mediaType = state.ui.mediaType;
-  let mt = (mediaType === "Movie") ? "movie" : "tv";
+  // let mt = (mediaType === "Movie") ? "movie" : "tv";
 
   if (!isEmpty(state.entities.interests)) {
-    for (let key in state.entities.interests) {
-      let movieId = state.entities.interests[key].movieId;
-      movieIdObj[movieId] = true;
+    for (let key in state.entities.interests[`${mediaType}s`]) {
+      let mediaId = state.entities.interests[`${mediaType}s`][key].mediaId;
+      mediaIdObj[mediaId] = true;
     }
   }
     return {
       genres: state.entities.genres,
       interests: state.entities.interests,
-      movieIds: movieIdObj,
+      mediaIds: mediaIdObj,
       mediaType
     };
 }

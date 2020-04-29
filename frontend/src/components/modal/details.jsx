@@ -41,10 +41,10 @@ class Details extends React.Component {
     this.props.detailsItem.poster_path = this.props.detailsItem.poster;
     this.props.detailsItem.vote_average = this.props.detailsItem.voteAverage;
     this.props.detailsItem.vote_count = this.props.detailsItem.voteCount;
-    this.props.detailsItem.type = this.props.mediaType.toLowerCase();
+    this.props.detailsItem.type = this.props.mediaType;
 
 
-    Promise.all([this.props.createInterest(this.props.detailsItem, this.props.mediaType)]).then(() => {
+    Promise.all([this.props.createInterest(this.props.detailsItem)]).then(() => {
       // genres calculation
       const {updateGenre, createGenre, genres, detailsItem, mediaType } = this.props;
 
@@ -64,12 +64,14 @@ class Details extends React.Component {
 
       const promises = response.data.results.map(recommendation => {
         let recId = recommendation.id;
-        return TMDBAPIUtil.getMovieInfo(recId).then(movie => {
-          if (!this.props.movieIds[movie.data.id]) {
+        return TMDBAPIUtil.getMovieInfo(recId).then(media => {
+          if (!this.props.mediaIds[media.data.id]) {
             count += 1;
 
-            recommendation.genres = movie.data.genres;
-            recommendation.runtime = movie.data.runtime;
+            recommendation.genres = media.data.genres;
+            recommendation.runtime = media.data.runtime;
+
+            //////REVISE///////
             recommendation.similarMovieId = id;
 
             recommendations.push(recommendation);
@@ -89,7 +91,8 @@ class Details extends React.Component {
     e.preventDefault();
 
     const localGenres = this.props.detailsItem.genres;
-    Promise.all([this.props.deleteInterest(this.props.detailsItem._id, this.props.detailsItem.type )]).then(() => {
+    // Promise.all([this.props.deleteInterest({ this.props.detailsItem._id, this.props.detailsItem.type } )]).then(() => {
+    Promise.all([this.props.deleteInterest(this.props.detailsItem)]).then(() => {
       // genres calculation
       const { genres, detailsItem, mediaType} = this.props;
       localGenres.forEach(name => {
@@ -210,28 +213,29 @@ class Details extends React.Component {
 
 const msp = (state, ownProps) => {
   let detailsItem;
+  let mediaType = state.ui.mediaType;
   if (ownProps.detailsType === "recommendations") {
     detailsItem = state.entities[ownProps.detailsType][ownProps.detailsRecType][ownProps.detailsId];
   } else {
-    detailsItem = state.entities[ownProps.detailsType][ownProps.detailsId];
+    detailsItem = state.entities[ownProps.detailsType][`${mediaType}s`][ownProps.detailsId];
   }
 
-  let movieIdObj = {};
+  let mediaIdObj = {};
     ///refactor after algorithm
-
-   if (!isEmpty(state.entities.interests)) {
-    for (let key in state.entities.interests) {
-      let movieId = state.entities.interests[key].movieId;
-      movieIdObj[movieId] = true;
+  if (!isEmpty(state.entities.interests)) {
+    for (let key in state.entities.interests[`${mediaType}s`]) {
+      let mediaId = state.entities.interests[`${mediaType}s`][key].mediaId;
+      mediaIdObj[mediaId] = true;
     }
-  }
+  };
+
   return {
     detailsItem, 
     genres: state.entities.genres,
-    mediaType: state.ui.mediaType,
-    movieIds: movieIdObj
-  }
-}
+    mediaIds: mediaIdObj,
+    mediaType
+  };
+};
 
 const mdp = dispatch => ({
   createInterest: data => dispatch(createInterest(data)),

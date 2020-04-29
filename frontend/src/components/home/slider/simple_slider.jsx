@@ -35,7 +35,6 @@ export default class SimpleSlider extends Component {
   render() {
     const { type, recType, mediaType } = this.props;
     let sliderItems;
-    console.log(this.props);
 // console.log(`SimpleSlider: ${mediaType}`);
 
 

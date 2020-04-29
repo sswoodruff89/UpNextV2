@@ -71,19 +71,23 @@ class Recommendations extends React.Component {
   }
 }
 
-const msp = (state, ownProps) => ({
-  recommendations: state.entities.recommendations,
-  lastViewedInterest: Object.values(state.entities.interests).sort((a,b) => {
-    if(a.date > b.date) {
-      return -1;
-    } else if (a.date < b.date){
-      return 1;
-    }
-    return 0;
-  }).shift(),
-  loading: state.ui.loading,
-  mediaType: ownProps.mediaType
-});
+const msp = (state, ownProps) => {
+  let mediaType = state.ui.mediaType;
+
+  return {
+    recommendations: state.entities.recommendations,
+    lastViewedInterest: Object.values(state.entities.interests[`${mediaType}s`]).sort((a,b) => {
+      if(a.date > b.date) {
+        return -1;
+      } else if (a.date < b.date){
+        return 1;
+      }
+      return 0;
+    }).shift(),
+    loading: state.ui.loading,
+    mediaType
+  }
+};
 
 const mdp = dispatch => ({
   fetchGenres: () => dispatch(fetchGenres()),

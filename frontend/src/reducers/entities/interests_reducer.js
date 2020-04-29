@@ -18,20 +18,19 @@ const InterestsReducer = (state = _initialState, action) => {
   
   switch(action.type) {
     case RECEIVE_INTERESTS:
+      
       action.interests.data.forEach((interest, idx) => {
         newState[`${action.interests.data[idx].type}s`][
           action.interests.data[idx].mediaId
         ] = interest;
       });
       return newState;
-    // case RECEIVE_MOVIE_INTERESTS:
-    //   newState[action.mediaType.toLowerCase()] = {};
-    //   Object.values(action.)
 
     case RECEIVE_NEW_INTEREST:
-      newState[`${action.interests.data.type}s`][
+      newState[`${action.interest.data.type}s`][
         action.interest.data.mediaId
       ] = action.interest.data;
+      
       return newState;
     case REMOVE_INTEREST:
       // newState = action.interest.data;

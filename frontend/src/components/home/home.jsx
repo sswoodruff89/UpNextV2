@@ -7,7 +7,7 @@ import Recommendations from './recommendations/recommendations';
 import {useDispatch} from 'react-redux';
 
 const Home = () => {
-
+////REVISE////
   const [mediaType, setMediaType] = useState("Movie");
   const dispatch = useDispatch();
 

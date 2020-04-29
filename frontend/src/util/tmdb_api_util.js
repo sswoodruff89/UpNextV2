@@ -12,7 +12,7 @@ export const getMovieInfo = function(id) {
   return instance.get(`https://api.themoviedb.org/3/movie/${id}?api_key=${tmdbApiKey}`);
 };
 
-export const getTVShowInfo = function(id) {
+export const getTVInfo = function(id) {
   return instance.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${tmdbApiKey}`)
 }
 
@@ -92,7 +92,7 @@ export const hasValidMovieFields = movie => {
   return true;
 }
 
-export const hasValidTVShowFields = tvShow => {
+export const hasValidTVFields = tvShow => {
   if (tvShow.name === "" || tvShow.name === null) return false;
   if (tvShow.poster_path === "" || tvShow.poster_path === null) return false;
   if (tvShow.vote_average === null) return false;

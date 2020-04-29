@@ -8,50 +8,47 @@ export const RECEIVE_NEW_INTEREST = "RECEIVE_NEW_INTEREST";
 export const REMOVE_INTEREST = "REMOVE_INTEREST";
 
 
-export const receiveInterests = (interests, mediaType) => ({
+export const receiveInterests = (interests) => ({
   type: RECEIVE_INTERESTS,
-  interests,
-  mediaType
+  interests
 });
 
 
-export const receiveNewInterest = (interest, mediaType) => ({
+export const receiveNewInterest = (interest) => ({
   type: RECEIVE_NEW_INTEREST,
-  interest,
-  mediaType
+  interest
 });
 
-export const removeInterest = (interestId, mediaType) => ({
+export const removeInterest = (interestId) => ({
   type: REMOVE_INTEREST,
-  interestId,
-  mediaType
+  interestId
 });
 
-export const fetchInterests = (mediaType) => dispatch => (
-  InterestApiUtil.getInterests()
-    .then(interests => dispatch(receiveInterests(interests, mediaType)))
+export const fetchInterests = (type) => dispatch => (
+  InterestApiUtil.getInterests(type)
+    .then(interests => dispatch(receiveInterests(interests)))
     .catch(err => console.log(err))  
 );
 
-export const createInterest = (data, mediaType) => dispatch => {
+export const createInterest = (data) => dispatch => {
   // dispatch(startLoadingAll());
   // setTimeout(() => {
   //   dispatch(endLoadingAll());
   // }, 1500);
 
   return InterestApiUtil.addInterest(data)
-  .then(interest => dispatch(receiveNewInterest(interest, mediaType)))
+  .then(interest => dispatch(receiveNewInterest(interest)))
   .catch(err => console.log(err))  
 }
  
 
-export const deleteInterest = (interestId, mediaType) => dispatch => {
+export const deleteInterest = (data) => dispatch => {
   // dispatch(startLoadingAll());
   // setTimeout(() => {
   //   dispatch(endLoadingAll());
   // }, 3000);
 
-  return InterestApiUtil.deleteInterest(interestId)
+  return InterestApiUtil.deleteInterest(data)
     .then(response => dispatch(removeInterest(response.data.id)))
     .catch(err => console.log(err));
 }
