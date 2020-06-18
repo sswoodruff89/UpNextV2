@@ -17,6 +17,7 @@ export const addInterest = data => {
   return axios.post('/api/interests/', data);
 };
 
-export const deleteInterest = interestId => {
-  return axios.delete(`api/interests/${interestId}`);
+export const deleteInterest = data => {
+  console.log(data);
+  return axios.delete(`api/interests/${data._id}`, {data});
 };

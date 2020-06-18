@@ -19,9 +19,9 @@ export const receiveNewInterest = (interest) => ({
   interest
 });
 
-export const removeInterest = (interestId) => ({
+export const removeInterest = (payload) => ({
   type: REMOVE_INTEREST,
-  interestId
+  payload
 });
 
 export const fetchInterests = (type) => dispatch => (
@@ -49,7 +49,10 @@ export const deleteInterest = (data) => dispatch => {
   // }, 3000);
 
   return InterestApiUtil.deleteInterest(data)
-    .then(response => dispatch(removeInterest(response.data.id)))
+    .then(response => {
+      console.log(response);
+      return dispatch(removeInterest(response.data))
+    })
     .catch(err => console.log(err));
 }
 

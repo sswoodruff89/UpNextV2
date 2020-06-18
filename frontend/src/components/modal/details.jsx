@@ -92,7 +92,7 @@ class Details extends React.Component {
 
     const localGenres = this.props.detailsItem.genres;
     // Promise.all([this.props.deleteInterest({ this.props.detailsItem._id, this.props.detailsItem.type } )]).then(() => {
-    Promise.all([this.props.deleteInterest(this.props.detailsItem)]).then(() => {
+    Promise.all([this.props.deleteInterest({type: this.props.mediaType, _id: this.props.detailsItem._id})]).then(() => {
       // genres calculation
       const { genres, detailsItem, mediaType} = this.props;
       localGenres.forEach(name => {

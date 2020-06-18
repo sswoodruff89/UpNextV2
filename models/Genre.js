@@ -34,7 +34,17 @@ const GenreSchema = new Schema({
     type: String,
     required: true,
     default: 'low'
-  }
+  },
+  movieTier: {
+    type: String,
+    required: true,
+    default: 'low'
+  },
+  tvTier: {
+    type: String,
+    required: true,
+    default: 'low'
+  },
 });
 
 module.exports = Genre = mongoose.model('Genre', GenreSchema);

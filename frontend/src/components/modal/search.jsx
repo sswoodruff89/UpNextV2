@@ -114,7 +114,7 @@ class Search extends React.Component {
               const { genres, mediaIds, mediaType } = this.props;
               response.data.genres.forEach(genre => {
                 if (genres[genre.name]) {
-                  updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(mediaIds).length, mediaType});
+                  updateGenre(genres[genre.name]._id, { value: 1, mediaType});
                 } else {
                   // createGenre({genre, mediaType} );
                   this.props.createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
@@ -221,7 +221,7 @@ const mdp = dispatch => ({
   createSimilarRecommendations: data => dispatch(createSimilarRecommendations(data)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   createGenre: data => dispatch(createGenre(data)),
-  updateGenre: (genreId, value, mediaType) => dispatch(updateGenre(genreId, value, mediaType))
+  updateGenre: (genreId, value) => dispatch(updateGenre(genreId, value))
 });
 
 export default connect(msp, mdp)(Search);

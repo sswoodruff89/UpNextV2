@@ -94,29 +94,29 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
 
 router.delete(`/:interestId`, passport.authenticate('jwt', {session: false}), (req, res) => {
   let currInterestId;
-  
-  if (req.body.type) {
-    MovieInterest.findOne({ _id: req.body.interestId })
+  // console.log(req.body);
+  if (req.body.type === "movie") {
+    MovieInterest.findOne({ _id: req.params.interestId })
       .then(interest => {
         currInterestId = interest.mediaId;
       })
       .then(interest => {
         MovieInterest.findOneAndDelete({ _id: req.params.interestId })
           .then(() => {
-            return res.json({ id: currInterestId });
+            return res.json({ id: currInterestId, mediaType: 'movie' });
           })
           .catch(err => console.log(err));
       });
 
   } else {
-    TVInterest.findOne({ _id: req.body.interestId })
+    TVInterest.findOne({ _id: req.params.interestId })
       .then(interest => {
         currInterestId = interest.mediaId;
       })
       .then(interest => {
         TVInterest.findOneAndDelete({ _id: req.params.interestId })
           .then(() => {
-            return res.json({ id: currInterestId });
+            return res.json({ id: currInterestId, mediaType: "tv" });
           })
           .catch(err => console.log(err));
       });
