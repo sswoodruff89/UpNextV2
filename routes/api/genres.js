@@ -21,6 +21,7 @@ const tierEvaluator = (currUserId, newGenre, interestCount) => {
       const tierRatio = newGenre.count / (count);
       if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
         newGenre.tier = 'superLike';
+        // newGenre[]
       } else if (tierRatio > TIER_THRESHOLD.LIKE) {
         newGenre.tier = 'like';
       } else {
@@ -68,11 +69,11 @@ router.patch("/:genreId", passport.authenticate('jwt', { session: false }), (req
         return res.status(400).json({ title: "No genre found" });
       } else {
         
-        const {value, mediaType} = req.body;
+        const {value, interestCount, mediaType} = req.body;
         genre.count += value;
         (mediaType === "movie") ? genre.movieCount += value : genre.tvCount += value;
 
-      Promise.all([tierEvaluator(req.user.id, genre, req.body.interestCount)]).then(() => {
+      Promise.all([tierEvaluator(req.user.id, genre, interestCount)]).then(() => {
         genre.save()
           .then(genre => res.json(genre))
           .catch(err => console.log(err));

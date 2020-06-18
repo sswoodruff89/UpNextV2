@@ -22,10 +22,18 @@ class Interests extends React.Component {
     ///
     ////
     if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
-      const { genres, interests } = this.props;
+      const { genres, interests, mediaType } = this.props;
       Object.values(genres).forEach(genre => {
-        this.props.updateGenre(genres[genre.name]._id, { value: 0 });
+        this.props.updateGenre(genres[genre.name]._id, {
+          value: 0,
+          interestCount: Object.keys(interests).length,
+          mediaType,
+        });
       });
+      // Object.values(genres).forEach(genre => {
+      //   this.props.updateGenre(genres[genre.name]._id, { value: 0 });
+      // });
+      // { value: 1, interestCount: Object.keys(mediaIds).length, mediaType}
     // without checking if the previous genres were not empty, we see a split second of the default API call where
       // genreIds is an empty arr and TMDB returns a default results response, because initially the genres slice of
       // state is empty
