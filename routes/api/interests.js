@@ -58,7 +58,7 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
       TVInterest.findOne({ user: req.user.id, mediaId: req.body.id })
         .then(interest => {
           if (interest) {
-            return res.status(400).json({ title: "You have already added this movie" });
+            return res.status(400).json({ title: "You have already added this tv show" });
           } else {
             const newInterest = new TVInterest({
               user: req.user.id,
