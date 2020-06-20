@@ -18,6 +18,5 @@ export const addInterest = data => {
 };
 
 export const deleteInterest = data => {
-  console.log(data);
   return axios.delete(`api/interests/${data._id}`, {data});
 };

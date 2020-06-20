@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createInterest } from '../../actions/interest_actions';
 import { createSimilarRecommendations, createAllRecommendations } from '../../actions/recommendation_actions';
-import { createGenre, updateGenre } from '../../actions/genre_actions';
+import { createGenre, updateGenre, updateGenres } from '../../actions/genre_actions';
 import * as TMDBAPIUtil from '../../util/tmdb_api_util';
 // const keys = require('../../config/keys');
 
@@ -103,7 +103,7 @@ class Search extends React.Component {
   handleClick(id) {
     return e => {
       e.preventDefault();
-      const {createInterest, updateGenre, createGenre, mediaType} = this.props;
+      const {createInterest, updateGenre, updateGenres, createGenre, mediaType} = this.props;
 
       TMDBAPIUtil.getMovieInfo(id)
         .then(response => {
@@ -112,6 +112,26 @@ class Search extends React.Component {
              Promise.all([createInterest(response.data, mediaType)]).then(() => {
               // genres calculation
               const { genres, mediaIds, mediaType } = this.props;
+
+              // let prevGenreIds = [];
+
+              // // let newGenreIds = [];
+
+              // response.data.genres.forEach(genre => {
+              //   if (genres[genre.name]) {
+              //     // updateGenre(genres[genre.name]._id, { value: 1, mediaType});
+              //     prevGenreIds.push(genres[genre.name]._id);
+              //     // updateGenre(genres[genre.name]._id, { value: 1, mediaType});
+              //   } else {
+              //     // createGenre({genre, mediaType} );
+              //     createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
+              //   }
+              // });
+
+              // if (prevGenreIds.length) {
+              //   updateGenres(prevGenreIds, { value: 1, mediaType });
+              // }
+
               response.data.genres.forEach(genre => {
                 if (genres[genre.name]) {
                   updateGenre(genres[genre.name]._id, { value: 1, mediaType});
@@ -120,6 +140,7 @@ class Search extends React.Component {
                   this.props.createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
                 }
               });
+
               this.props.closeModal();
             });
           } else {
@@ -221,7 +242,8 @@ const mdp = dispatch => ({
   createSimilarRecommendations: data => dispatch(createSimilarRecommendations(data)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   createGenre: data => dispatch(createGenre(data)),
-  updateGenre: (genreId, value) => dispatch(updateGenre(genreId, value))
+  updateGenre: (genreId, value) => dispatch(updateGenre(genreId, value)),
+  updateGenres: (genreIds, value) => dispatch(updateGenres(genreIds, value))
 });
 
 export default connect(msp, mdp)(Search);

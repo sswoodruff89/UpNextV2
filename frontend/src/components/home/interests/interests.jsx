@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import SimpleSlider from '../slider/simple_slider';
 import { fetchInterests } from '../../../actions/interest_actions';
-import { updateGenre } from '../../../actions/genre_actions';
+import { updateGenre, updateGenres } from '../../../actions/genre_actions';
 import {startLoadingAll, endLoadingAll} from "../../../actions/recommendation_actions";
 import * as TMDBAPIUtil from '../../../util/tmdb_api_util';
 import { createAllRecommendations, deleteAllRecommendations } from '../../../actions/recommendation_actions';
@@ -21,15 +21,25 @@ class Interests extends React.Component {
     //Store recommendations to shorten runtime?
     ///
     ////
-    if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
+    console.log(prevProps.genres);
+    console.log(this.props.genres);
+    console.log(prevProps.interests);
+    console.log(this.props.interests);
+    
+    if (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres)) {
+    // if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
+            console.log("CHANGE");
       const { genres, interests, mediaType } = this.props;
-      Object.values(genres).forEach(genre => {
-        this.props.updateGenre(genres[genre.name]._id, {
-          value: 0,
-          interestCount: Object.keys(interests).length,
-          mediaType,
-        });
-      });
+      // Object.values(genres).forEach(genre => {
+      //   this.props.updateGenre(genres[genre.name]._id, {
+      //     value: 0,
+      //     mediaType
+      //   });
+      // });
+
+      this.props.updateGenres("genreIds", {mediaType});
+
+
       // Object.values(genres).forEach(genre => {
       //   this.props.updateGenre(genres[genre.name]._id, { value: 0 });
       // });
@@ -319,6 +329,7 @@ const msp = (state, ownProps) => {
 const mdp = dispatch => ({
   fetchInterests: (type) => dispatch(fetchInterests(type)),
   updateGenre: (genreId,value) => dispatch(updateGenre(genreId,value)),
+  updateGenres: (genreIds, value) => dispatch(updateGenres(genreIds, value)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   deleteAllRecommendations: () => dispatch(deleteAllRecommendations()),
   startLoadingAll: () => dispatch(startLoadingAll()),

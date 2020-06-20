@@ -4,7 +4,7 @@ import { RECEIVE_USER_LOGOUT } from '../../actions/session_actions';
 const GenresReducer = (state = {}, action) => {
   Object.freeze(state);
   let newState = Object.assign({}, state);
-
+  if (action.type === RECEIVE_GENRES || action.type === RECEIVE_GENRE) debugger
   switch(action.type) {
     case RECEIVE_GENRES:
       action.genres.data.forEach((genre, idx) => {
