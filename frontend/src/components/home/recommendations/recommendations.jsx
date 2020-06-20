@@ -10,11 +10,11 @@ class Recommendations extends React.Component {
   componentDidMount() {
     // TODO: this shouldn't be here, fetchGenres() shouldn't be here either
     // this.props.fetchInterests();
-    
+    // debugger
     if (this.props.type === "similar") {
-      this.props.fetchSimilarRecommendations();
+      this.props.fetchSimilarRecommendations(this.props.mediaType);
     } else {
-      // this.props.fetchAllRecommendations();
+      // this.props.fetchAllRecommendations(this.props.mediaType);
       this.props.deleteAllRecommendations();
     }
   }
@@ -91,8 +91,8 @@ const msp = (state, ownProps) => {
 
 const mdp = dispatch => ({
   fetchGenres: () => dispatch(fetchGenres()),
-  fetchSimilarRecommendations: () => dispatch(fetchSimilarRecommendations()),
-  fetchAllRecommendations: () => dispatch(fetchAllRecommendations()),
+  fetchSimilarRecommendations: (mediaType) => dispatch(fetchSimilarRecommendations(mediaType)),
+  fetchAllRecommendations: (mediaType) => dispatch(fetchAllRecommendations(mediaType)),
   deleteAllRecommendations: () => dispatch(deleteAllRecommendations()),
   fetchInterests: () => dispatch(fetchInterests())
 });

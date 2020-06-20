@@ -21,14 +21,13 @@ class Interests extends React.Component {
     //Store recommendations to shorten runtime?
     ///
     ////
-    console.log(prevProps.genres);
-    console.log(this.props.genres);
-    console.log(prevProps.interests);
-    console.log(this.props.interests);
-    
+    // console.log(prevProps.genres);
+    // console.log(this.props.genres);
+    // console.log(prevProps.interests);
+    // console.log(this.props.interests);
+    // debugger
     if (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres)) {
     // if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
-            console.log("CHANGE");
       const { genres, interests, mediaType } = this.props;
       // Object.values(genres).forEach(genre => {
       //   this.props.updateGenre(genres[genre.name]._id, {
@@ -49,9 +48,9 @@ class Interests extends React.Component {
       // state is empty
     }
     
-    if (this.genresChanged(prevProps.genres, this.props.genres) && !isEmpty(this.props.genres) && !isEmpty(this.props.interests)) {
+    if (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres) && !isEmpty(this.props.genres) && !isEmpty(this.props.interests)) {
       // filter genre slice of state to get superlike genre array
-      // call getAllRecommendations
+      // call getAllRecommendations'
       let mixLikeArr = [];
       // Only set superLikeArr if we have at least 3 superLiked-tier genres
       let checkSuperLikeArr = Object.values(this.props.genres).filter(ele => ele.tier === "superLike").map(el => el.id);
@@ -62,7 +61,7 @@ class Interests extends React.Component {
 
 
       let recommendations = [];
-      let movieIdTrack = new Set();
+      let mediaIdTrack = new Set();
       let totalExpected = 50;
       let promiseAExpected = 15;
       let promiseBExpected = 15;
@@ -70,20 +69,29 @@ class Interests extends React.Component {
       let promiseDExpected = 10;
       // Pull out random 3 superLiked-tier genres, joined by AND
 
-      // console.time("allRec");
-      // console.log(".................................");
+      console.time("allRec");
+      console.log(".................................");
 
+
+      const type = (this.props.mediaType === "movie") ? "Movie" : "TV"
       TMDBAPIUtil.getAllRecommendations(mixLikeArr)
         .then(response => {
           const promisesA = [];
           for (let i=0; i < Math.min(response.data.results.length,promiseAExpected); i++) {
             let recommendation = response.data.results[i];
             let recId = recommendation.id;
-            promisesA.push(TMDBAPIUtil.getMovieInfo(recId)
-              .then(movie => {
-                if (!this.props.interests[movie.data.id] && TMDBAPIUtil.hasValidMovieFields(movie.data)) {
-                  recommendation.genres = movie.data.genres;
-                  recommendation.runtime = movie.data.runtime;
+            promisesA.push(TMDBAPIUtil.getMediaInfo(recId, this.props.mediaType)
+              .then(media => {
+                if (!this.props.interests[media.data.id] && TMDBAPIUtil[`hasValid${type}Fields`](media.data)) {
+                  recommendation.genres = media.data.genres;
+                  recommendation.runtime = media.data.runtime;
+                  recommendation.type = this.props.mediaType;
+                  recommendation.overview = recommendation.overview === "" ? "N/A" : recommendation.overview;
+                  if (type === "Movie") {
+                    recommendation.runtime = media.data.runtime;
+                  } else {
+                    recommendation.seasons = media.data.seasons;
+                  }
                   recommendations.push(recommendation);
                 }
               })
@@ -122,13 +130,19 @@ class Interests extends React.Component {
                   for (let i=0; i < Math.min(response.data.results.length,promiseBExpected); i++) {
                     let recommendation = response.data.results[i];
                     let recId = recommendation.id;
-                    if (!movieIdTrack.has(recId)) {
-                      promisesB.push(TMDBAPIUtil.getMovieInfo(recId)
-                        .then(movie => {
-                          if (!this.props.interests[movie.data.id] && TMDBAPIUtil.hasValidMovieFields(movie.data)) {
-                            recommendation.genres = movie.data.genres;
-                            recommendation.runtime = movie.data.runtime;
+                    if (!mediaIdTrack.has(recId)) {
+                      promisesB.push(TMDBAPIUtil.getMediaInfo(recId, this.props.mediaType)
+                        .then(media => {
+                          if (!this.props.interests[media.data.id] && TMDBAPIUtil[`hasValid${type}Fields`](media.data)) {
+                            recommendation.genres = media.data.genres;
+                            recommendation.runtime = media.data.runtime;
+                            recommendation.type = this.props.mediaType;
                             recommendation.overview = recommendation.overview === "" ? "N/A" : recommendation.overview;
+                            if (type === "Movie") {
+                              recommendation.runtime = media.data.runtime;
+                            } else {
+                              recommendation.seasons = media.data.seasons;
+                            }
                             recommendations.push(recommendation);
                           }
                         })
@@ -166,13 +180,19 @@ class Interests extends React.Component {
                           for (let i=0; i < Math.min(response.data.results.length,promiseCExpected); i++) {
                             let recommendation = response.data.results[i];
                             let recId = recommendation.id;
-                            if (!movieIdTrack.has(recId)) {
-                              promisesC.push(TMDBAPIUtil.getMovieInfo(recId)
-                                .then(movie => {
-                                  if (!this.props.interests[movie.data.id] && TMDBAPIUtil.hasValidMovieFields(movie.data)) {
-                                    recommendation.genres = movie.data.genres;
-                                    recommendation.runtime = movie.data.runtime;
+                            if (!mediaIdTrack.has(recId)) {
+                              promisesC.push(TMDBAPIUtil.getMediaInfo(recId, this.props.mediaType)
+                                .then(media => {
+                                  if (!this.props.interests[media.data.id] && TMDBAPIUtil[`hasValid${type}Fields`](media.data)) {
+                                    recommendation.genres = media.data.genres;
+                                    recommendation.runtime = media.data.runtime;
+                                    recommendation.type = this.props.mediaType;
                                     recommendation.overview = recommendation.overview === "" ? "N/A" : recommendation.overview;
+                                    if (type === "Movie") {
+                                      recommendation.runtime = media.data.runtime;
+                                    } else {
+                                      recommendation.seasons = media.data.seasons;
+                                    }
                                     recommendations.push(recommendation);
                                   }
                                 })
@@ -198,13 +218,19 @@ class Interests extends React.Component {
                                   for (let i=0; i < Math.min(response.data.results.length,promiseDExpected); i++) {
                                     let recommendation = response.data.results[i];
                                     let recId = recommendation.id;
-                                    if (!movieIdTrack.has(recId)) {
-                                      promisesD.push(TMDBAPIUtil.getMovieInfo(recId)
-                                        .then(movie => {
-                                          if (!this.props.interests[movie.data.id] && TMDBAPIUtil.hasValidMovieFields(movie.data)) {
-                                            recommendation.genres = movie.data.genres;
-                                            recommendation.runtime = movie.data.runtime;
+                                    if (!mediaIdTrack.has(recId)) {
+                                      promisesD.push(TMDBAPIUtil.getMediaInfo(recId, this.props.mediaType)
+                                        .then(media => {
+                                          if (!this.props.interests[media.data.id] && TMDBAPIUtil[`hasValid${type}Fields`](media.data)) {
+                                            recommendation.genres = media.data.genres;
+                                            recommendation.runtime = media.data.runtime;
+                                            recommendation.type = this.props.mediaType;
                                             recommendation.overview = recommendation.overview === "" ? "N/A" : recommendation.overview;
+                                            if (type === "Movie") {
+                                              recommendation.runtime = media.data.runtime;
+                                            } else {
+                                              recommendation.seasons = media.data.seasons;
+                                            }
                                             recommendations.push(recommendation);
                                           }
                                         })
@@ -226,13 +252,19 @@ class Interests extends React.Component {
                                           for (let i=0; i < Math.min(response.data.results.length,remainder); i++) {
                                             let recommendation = response.data.results[i];
                                             let recId = recommendation.id;
-                                            if (!movieIdTrack.has(recId)) {
-                                              promisesE.push(TMDBAPIUtil.getMovieInfo(recId)
-                                                .then(movie => {
-                                                  if (!this.props.interests[movie.data.id] && TMDBAPIUtil.hasValidMovieFields(movie.data)) {
-                                                    recommendation.genres = movie.data.genres;
-                                                    recommendation.runtime = movie.data.runtime;
+                                            if (!mediaIdTrack.has(recId)) {
+                                              promisesE.push(TMDBAPIUtil.getMediaInfo(recId, this.props.mediaType)
+                                                .then(media => {
+                                                  if (!this.props.interests[media.data.id] && TMDBAPIUtil[`hasValid${type}Fields`](media.data)) {
+                                                    recommendation.genres = media.data.genres;
+                                                    recommendation.runtime = media.data.runtime;
+                                                    recommendation.type = this.props.mediaType;
                                                     recommendation.overview = recommendation.overview === "" ? "N/A" : recommendation.overview;
+                                                    if (type === "Movie") {
+                                                      recommendation.runtime = media.data.runtime;
+                                                    } else {
+                                                      recommendation.seasons = media.data.seasons;
+                                                    }
                                                     recommendations.push(recommendation);
                                                   }
                                                 })

@@ -153,34 +153,97 @@ class Search extends React.Component {
         .then(response => {
           let count = 0;
           let recommendations = [];
-          let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
+          // let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
 
-          const promises = response.data.results.map((recommendation) => {
-            let recId = recommendation.id;
-            return TMDBAPIUtil.getMovieInfo(recId)
-              .then(media => {
-                if (!this.props.mediaIds[media.data.id]) {
-                  count += 1;
-
-                  recommendation.genres = media.data.genres;
-                  recommendation.runtime = media.data.runtime;
-                  ////REVISE
-                  recommendation[`similar${type}Id`] = id;
-
-                  recommendations.push(recommendation);
-                  if (count === 15) this.props.closeModal();
-                }
-              });
-          });
-
-          Promise.all(promises)
-            .then(() => {
-              this.props.createSimilarRecommendations(recommendations);
-              this.props.closeModal();
+          if (this.props.mediaType === "movie") {
+            const promises = response.data.results.map((recommendation) => {
+              let recId = recommendation.id;
+              return TMDBAPIUtil.getMovieInfo(recId)
+                .then(media => {
+                  if (!this.props.mediaIds[media.data.id]) {
+                    count += 1;
+  
+                    recommendation.genres = media.data.genres;
+                    recommendation.runtime = media.data.runtime;
+                    recommendation.type = 'movie';
+                    ////REVISE
+                    recommendation[`similarMediaId`] = id;
+  
+                    recommendations.push(recommendation);
+                    if (count === 15) this.props.closeModal();
+                  }
+                });
             });
+  
+            Promise.all(promises)
+              .then(() => {
+                this.props.createSimilarRecommendations(recommendations);
+                this.props.closeModal();
+              });
+              
+            } else {
+              const promises = response.data.results.map((recommendation) => {
+                let recId = recommendation.id;
+                return TMDBAPIUtil.getTVInfo(recId)
+                  .then(media => {
+                    if (!this.props.mediaIds[media.data.id]) {
+                      count += 1;
+    
+                      recommendation.genres = media.data.genres;
+                      recommendation.runtime = media.data.runtime;
+                      recommendation.type = 'tv';
+                      ////REVISE
+                      recommendation[`similarMediaId`] = id;
+    
+                      recommendations.push(recommendation);
+                      if (count === 15) this.props.closeModal();
+                    }
+                  });
+              });
+    
+              Promise.all(promises)
+                .then(() => {
+                  this.props.createSimilarRecommendations(recommendations);
+                  this.props.closeModal();
+                });
+              
+              
+          }
         });
-    };
-  }
+
+      }
+      // TMDBAPIUtil.getSimilarRecommendations(id)
+      //   .then(response => {
+      //     let count = 0;
+      //     let recommendations = [];
+      //     let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
+
+      //     const promises = response.data.results.map((recommendation) => {
+      //       let recId = recommendation.id;
+      //       return TMDBAPIUtil.getMovieInfo(recId)
+      //         .then(media => {
+      //           if (!this.props.mediaIds[media.data.id]) {
+      //             count += 1;
+
+      //             recommendation.genres = media.data.genres;
+      //             recommendation.runtime = media.data.runtime;
+      //             ////REVISE
+      //             recommendation[`similar${type}Id`] = id;
+
+      //             recommendations.push(recommendation);
+      //             if (count === 15) this.props.closeModal();
+      //           }
+      //         });
+      //     });
+
+      //     Promise.all(promises)
+      //       .then(() => {
+      //         this.props.createSimilarRecommendations(recommendations);
+      //         this.props.closeModal();
+      //       });
+      //   });
+  };
+  
   
   render() {
     const {searchResults} = this.state;

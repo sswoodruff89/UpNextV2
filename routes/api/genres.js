@@ -60,9 +60,9 @@ const tierEvaluator = (currUserId, newGenre, mediaType) => {
 };
 
 const tierEvaluator2 = (genreCount, count) => {
-  console.log(genreCount);
-  console.log(count);
-  console.log("--------------")
+  // console.log(genreCount);
+  // console.log(count);
+  // console.log("--------------")
   const tierRatio = genreCount / count;
 
   if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
@@ -110,8 +110,8 @@ router.patch("/:genreId", passport.authenticate('jwt', { session: false }), (req
       } else {
         
         const {value, interestCount, mediaType} = req.body;
-        genre.count += value;
-        (mediaType === "movie") ? genre.movieCount += value : genre.tvCount += value;
+        genre.count = Math.max(genre.count + value, 0);
+        (mediaType === "movie") ? genre.movieCount += Math.max(genre.count + value, 0) : genre.tvCount += Math.max(genre.count + value, 0);
         
       Promise.all([tierEvaluator(req.user.id, genre, mediaType)]).then(() => {
         genre.save()
@@ -132,7 +132,7 @@ router.patch("/", passport.authenticate('jwt', { session: false }), (req, res) =
         MovieInterest.countDocuments({ user: req.user.id })
           .then(count => {
                 genres.forEach(genre => {
-                  Genre.update({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), movieTier: tierEvaluator2(genre.movieCount, count) } }])
+                  Genre.updateOne({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), movieTier: tierEvaluator2(genre.movieCount, count) } }])
                     .catch(err => console.error(`Failed to update ${genre.name}`));
                 })
           })
@@ -151,7 +151,7 @@ router.patch("/", passport.authenticate('jwt', { session: false }), (req, res) =
         TVInterest.countDocuments({ user: req.user.id })
           .then(count => {
             genres.forEach(genre => {
-              Genre.update({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), tvTier: tierEvaluator2(genre.movieCount, count) } }])
+              Genre.updateOne({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), tvTier: tierEvaluator2(genre.movieCount, count) } }])
                 .catch(err => console.error(`Failed to update ${genre.name}`));
             })
           })

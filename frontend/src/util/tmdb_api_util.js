@@ -16,6 +16,10 @@ export const getTVInfo = function(id) {
   return instance.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${tmdbApiKey}`)
 }
 
+export const getMediaInfo = function(id, type) {
+  return instance.get(`https://api.themoviedb.org/3/${type}/${id}?api_key=${tmdbApiKey}`)
+}
+
 export const getSimilarRecommendations = function(id) {
   return instance.get(`https://api.themoviedb.org/3/movie/${id}/similar?api_key=${tmdbApiKey}`);
 };

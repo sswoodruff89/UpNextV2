@@ -66,23 +66,28 @@ export const createAllRecommendations = data => dispatch => {
   });
 };
 
-export const fetchSimilarRecommendations = () => dispatch => {
+export const fetchSimilarRecommendations = mediaType => dispatch => {
   dispatch(startLoadingSimilar());
 
-  RecommendationAPIUtil.fetchSimilarRecommendations().then(res => {
+  RecommendationAPIUtil.fetchSimilarRecommendations(mediaType).then(res => {
     dispatch(receiveSimilarRecommendations(res.data));
   });
 };
 
 ///MAY NOT NEED THIS////
-export const fetchAllRecommendations = () => dispatch => {
+export const fetchAllRecommendations = (mediaType) => dispatch => {
   dispatch(startLoadingAll());
 
 
-  RecommendationAPIUtil.fetchAllRecommendations().then(res => {
+  RecommendationAPIUtil.fetchAllRecommendations(mediaType).then(res => {
     dispatch(receiveAllRecommendations(res.data));
   });
 };
+
+export const deleteSimilarRecommendations = () => dispatch => {
+  return RecommendationAPIUtil.deleteSimilarRecommendations().then(res => {
+    dispatch(receiveSimilarRecommendations(res.data));
+  });}
 
 export const deleteAllRecommendations = () => dispatch => {
   return RecommendationAPIUtil.deleteAllRecommendations().then(res => {

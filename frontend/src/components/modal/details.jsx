@@ -35,13 +35,15 @@ class Details extends React.Component {
 
   addInterest(e) {
     e.preventDefault();
-    let id = this.props.detailsItem.movieId;
+    // let id = this.props.detailsItem.movieId;
+    let id = this.props.detailsItem.mediaId;
     this.props.detailsItem.id = this.props.detailsItem.movieId;
     this.props.detailsItem.release_date = this.props.detailsItem.year;
     this.props.detailsItem.poster_path = this.props.detailsItem.poster;
     this.props.detailsItem.vote_average = this.props.detailsItem.voteAverage;
     this.props.detailsItem.vote_count = this.props.detailsItem.voteCount;
     this.props.detailsItem.type = this.props.mediaType;
+
 
 
     Promise.all([this.props.createInterest(this.props.detailsItem)]).then(() => {
@@ -56,35 +58,97 @@ class Details extends React.Component {
         }
       });
     });
-
+// 
     // May refactor in the future so that recommendations are made only after and if createInterest and closeModal are successful
-    TMDBAPIUtil.getSimilarRecommendations(id).then(response => {
-      let count = 0;
-      let recommendations = [];
+    TMDBAPIUtil.getSimilarRecommendations(id)
+      .then(response => {
+        let count = 0;
+        let recommendations = [];
+        // let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
 
-      const promises = response.data.results.map(recommendation => {
-        let recId = recommendation.id;
-        return TMDBAPIUtil.getMovieInfo(recId).then(media => {
-          if (!this.props.mediaIds[media.data.id]) {
-            count += 1;
+        if (this.props.mediaType === "movie") {
+          const promises = response.data.results.map((recommendation) => {
+            let recId = recommendation.id;
+            return TMDBAPIUtil.getMovieInfo(recId)
+              .then(media => {
+                if (!this.props.mediaIds[media.data.id]) {
+                  count += 1;
 
-            recommendation.genres = media.data.genres;
-            recommendation.runtime = media.data.runtime;
+                  recommendation.genres = media.data.genres;
+                  recommendation.runtime = media.data.runtime;
+                  recommendation.type = 'movie';
+                  ////REVISE
+                  recommendation[`similarMediaId`] = id;
 
-            //////REVISE///////
-            recommendation.similarMovieId = id;
+                  recommendations.push(recommendation);
+                  if (count === 15) this.props.closeModal();
+                }
+              });
+          });
 
-            recommendations.push(recommendation);
-            if (count === 15) this.props.closeModal();
-          }
-        });
+          Promise.all(promises)
+            .then(() => {
+              this.props.createSimilarRecommendations(recommendations);
+              this.props.closeModal();
+            });
+
+        } else {
+          const promises = response.data.results.map((recommendation) => {
+            let recId = recommendation.id;
+            return TMDBAPIUtil.getTVInfo(recId)
+              .then(media => {
+                if (!this.props.mediaIds[media.data.id]) {
+                  count += 1;
+
+                  recommendation.genres = media.data.genres;
+                  recommendation.runtime = media.data.runtime;
+                  recommendation.type = 'tv';
+                  ////REVISE
+                  recommendation[`similarMediaId`] = id;
+
+                  recommendations.push(recommendation);
+                  if (count === 15) this.props.closeModal();
+                }
+              });
+          });
+
+          Promise.all(promises)
+            .then(() => {
+              this.props.createSimilarRecommendations(recommendations);
+              this.props.closeModal();
+            });
+
+
+        }
       });
 
-      Promise.all(promises).then(() => {
-        this.props.createSimilarRecommendations(recommendations);
-        this.props.closeModal();
-      });
-    });
+    // TMDBAPIUtil.getSimilarRecommendations(id).then(response => {
+    //   let count = 0;
+    //   let recommendations = [];
+
+    //   const promises = response.data.results.map(recommendation => {
+    //     let recId = recommendation.id;
+    //     return TMDBAPIUtil.getMovieInfo(recId).then(media => {
+    //       if (!this.props.mediaIds[media.data.id]) {
+    //         count += 1;
+
+    //         recommendation.genres = media.data.genres;
+    //         recommendation.runtime = media.data.runtime;
+
+    //         //////REVISE///////
+    //         recommendation.similarMovieId = id;
+
+    //         recommendations.push(recommendation);
+    //         if (count === 15) this.props.closeModal();
+    //       }
+    //     });
+    //   });
+
+    //   Promise.all(promises).then(() => {
+    //     this.props.createSimilarRecommendations(recommendations);
+    //     this.props.closeModal();
+    //   });
+    // });
   }
 
   removeFromInterests(e) {
@@ -190,8 +254,22 @@ class Details extends React.Component {
                 <span>{this.handleDate(detailsItem.year)}</span>
               </span>
               <span className="runtime">
-                <span>Runtime:</span>
-                <span>{this.handleRuntime(detailsItem.runtime)}</span>
+                {
+                  (this.props.mediaType === "movie") ?
+                  (
+                    <>
+                      <span>Runtime:</span>
+                      <span>{this.handleRuntime(detailsItem.runtime)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Seasons:</span>
+                      <span>{detailsItem.seasons}</span>
+                    </>
+                  )
+                }
+                {/* <span>Runtime:</span>
+                <span>{this.handleRuntime(detailsItem.runtime)}</span> */}
               </span>
 
               <div className="genres">

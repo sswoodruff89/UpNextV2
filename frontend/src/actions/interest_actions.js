@@ -50,7 +50,6 @@ export const deleteInterest = (data) => dispatch => {
 
   return InterestApiUtil.deleteInterest(data)
     .then(response => {
-      console.log(response);
       return dispatch(removeInterest(response.data))
     })
     .catch(err => console.log(err));

@@ -70,7 +70,7 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
               type: req.body.type,
               poster: req.body.poster_path,
               overview: req.body.overview,
-              seasons: req.body.runtime,
+              seasons: req.body.seasons,
               voteAverage: req.body.vote_average,
               voteCount: req.body.vote_count
             });
