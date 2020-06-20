@@ -11,7 +11,7 @@ class SimpleSliderItem extends React.Component {
       modal = {
         type: "details",
         detailsType: type,
-        detailsId: entry.movieId,
+        detailsId: entry.mediaId,
         mediaType
       };
     } else if (type === 'recommendations') {
@@ -19,7 +19,7 @@ class SimpleSliderItem extends React.Component {
         type: "details",
         detailsType: type,
         detailsRecType: recType,
-        detailsId: entry.movieId,
+        detailsId: entry.mediaId,
         mediaType
       };
     }

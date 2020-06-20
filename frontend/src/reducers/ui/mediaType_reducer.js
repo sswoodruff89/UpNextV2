@@ -1,6 +1,6 @@
 import {SET_MEDIA_TYPE} from "../../actions/mediaType_actions";
 
-const initialState = "movie";
+const initialState = "tv";
 
 export default (state = initialState, action) => {
 

@@ -145,6 +145,7 @@ router.get('/similar/:mediaType', passport.authenticate('jwt', { session: false 
 
 router.post('/similar', passport.authenticate('jwt', { session: false }), (req, res) => {
   // if this recommendation has already been made for this similar movie, just return it back
+ console.log(req.body.data);
   Recommendation.find({ similarMediaId: req.body.data[0].similarMediaId })
     .then(similarRecommendations => {
       if (similarRecommendations.length !== 0) {
@@ -161,8 +162,8 @@ router.post('/similar', passport.authenticate('jwt', { session: false }), (req, 
             user: req.user.id,
             movieId: recommendation.id,
             mediaId: recommendation.id,
-            title: recommendation.title,
-            year: recommendation.release_date,
+            title: recommendation.title || recommendation.name,
+            year: recommendation.release_date || recommendation.first_air_date,
             genres: recommendation.genres,
             type: recommendation.type,
             poster: recommendation.poster_path,
@@ -190,10 +191,11 @@ router.post('/similar', passport.authenticate('jwt', { session: false }), (req, 
 });
 
 router.post('/all', passport.authenticate('jwt', { session: false }), (req, res) => {
-  Recommendation.deleteMany({ user: req.user.id, similarMovieId: null }).then(() => {
+  Recommendation.deleteMany({ user: req.user.id, similarMediaId: null }).then(() => {
     const allRecommendations = {};
     req.body.data.forEach((recommendation, i) => {
       allRecommendations[i] = new Recommendation({
+        similarMediaId: null,
         similarMovieId: null,
         user: req.user.id,
         mediaId: recommendation.id,

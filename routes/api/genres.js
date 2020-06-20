@@ -111,7 +111,8 @@ router.patch("/:genreId", passport.authenticate('jwt', { session: false }), (req
         
         const {value, interestCount, mediaType} = req.body;
         genre.count = Math.max(genre.count + value, 0);
-        (mediaType === "movie") ? genre.movieCount += Math.max(genre.count + value, 0) : genre.tvCount += Math.max(genre.count + value, 0);
+        // (mediaType === "movie") ? genre.movieCount = Math.max(genre.count + value, 0) : genre.tvCount = Math.max(genre.count + value, 0);
+        (mediaType === "movie") ? genre.movieCount = Math.max(genre.movieCount + value, 0) : genre.tvCount = Math.max(genre.tvCount + value, 0);
         
       Promise.all([tierEvaluator(req.user.id, genre, mediaType)]).then(() => {
         genre.save()
@@ -151,7 +152,7 @@ router.patch("/", passport.authenticate('jwt', { session: false }), (req, res) =
         TVInterest.countDocuments({ user: req.user.id })
           .then(count => {
             genres.forEach(genre => {
-              Genre.updateOne({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), tvTier: tierEvaluator2(genre.movieCount, count) } }])
+              Genre.updateOne({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), tvTier: tierEvaluator2(genre.tvCount, count) } }])
                 .catch(err => console.error(`Failed to update ${genre.name}`));
             })
           })

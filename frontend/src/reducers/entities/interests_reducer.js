@@ -9,7 +9,7 @@ import { RECEIVE_USER_LOGOUT } from '../../actions/session_actions';
 
 const _initialState = {
   movies: {},
-  tvshows: {}
+  tvs: {}
 }
 
 const InterestsReducer = (state = _initialState, action) => {

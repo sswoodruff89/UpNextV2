@@ -21,11 +21,7 @@ class Interests extends React.Component {
     //Store recommendations to shorten runtime?
     ///
     ////
-    // console.log(prevProps.genres);
-    // console.log(this.props.genres);
-    // console.log(prevProps.interests);
-    // console.log(this.props.interests);
-    // debugger
+
     if (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres)) {
     // if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
       const { genres, interests, mediaType } = this.props;
@@ -74,7 +70,7 @@ class Interests extends React.Component {
 
 
       const type = (this.props.mediaType === "movie") ? "Movie" : "TV"
-      TMDBAPIUtil.getAllRecommendations(mixLikeArr)
+      TMDBAPIUtil.getAllRecommendations(mixLikeArr, this.props.mediaType)
         .then(response => {
           const promisesA = [];
           for (let i=0; i < Math.min(response.data.results.length,promiseAExpected); i++) {
@@ -121,7 +117,7 @@ class Interests extends React.Component {
                 mixLikeArr = [];
               }
               // Pull out random 2 liked-tier genres, joined by OR
-              TMDBAPIUtil.getAllRecommendations(mixLikeArr, 2, "%2C")
+              TMDBAPIUtil.getAllRecommendations(mixLikeArr, this.props.mediaType, 2, "%2C")
                 .then(response => {
                   const promisesB = [];
                   
@@ -171,7 +167,7 @@ class Interests extends React.Component {
                         mixLikeArr = [];
                       }
                       // Pull out random 2 liked-tier genres, joined by OR
-                      TMDBAPIUtil.getAllRecommendations(mixLikeArr, 2, "%2C")
+                      TMDBAPIUtil.getAllRecommendations(mixLikeArr, this.props.mediaType, 2, "%2C")
                         .then(response => {
                           const promisesC = [];
 
@@ -209,7 +205,7 @@ class Interests extends React.Component {
                                 mixLikeArr = [];
                               }
                               // Pull out random 2 liked-tier genres, joined by AND
-                              TMDBAPIUtil.getAllRecommendations(mixLikeArr, 2, "%2C")
+                              TMDBAPIUtil.getAllRecommendations(mixLikeArr, this.props.mediaType, 2, "%2C")
                                 .then(response => {
                                   const promisesD = [];
 
@@ -245,7 +241,7 @@ class Interests extends React.Component {
                                       // Pull out random 2 liked-tier genres, joined by AND
                                       let remainder = Math.max(0,totalExpected - recommendations.length);
                                       remainder = Math.min(20,remainder);
-                                      TMDBAPIUtil.getAllRecommendations(mixLikeArr, mixLikeArr.length, "%7C")
+                                      TMDBAPIUtil.getAllRecommendations(mixLikeArr, this.props.mediaType, mixLikeArr.length, "%7C")
                                         .then(response => {
                                           const promisesE = [];
                                           

@@ -6,10 +6,12 @@ import { createInterest, deleteInterest } from "../../actions/interest_actions";
 import { fetchSimilarRecommendations, createSimilarRecommendations, createAllRecommendations } from '../../actions/recommendation_actions';
 import { createGenre, updateGenre } from '../../actions/genre_actions';
 import * as TMDBAPIUtil from '../../util/tmdb_api_util';
+import genreSplit from '../../util/genre_split_util';
 
 
 const tmdbApiKey = keys.tmdbApiKey;
 const isEmpty = require("lodash.isempty");
+
 
 class Details extends React.Component {
   constructor(props) {
@@ -37,13 +39,23 @@ class Details extends React.Component {
     e.preventDefault();
     // let id = this.props.detailsItem.movieId;
     let id = this.props.detailsItem.mediaId;
-    this.props.detailsItem.id = this.props.detailsItem.movieId;
+    this.props.detailsItem.id = this.props.detailsItem.mediaId;
     this.props.detailsItem.release_date = this.props.detailsItem.year;
     this.props.detailsItem.poster_path = this.props.detailsItem.poster;
     this.props.detailsItem.vote_average = this.props.detailsItem.voteAverage;
     this.props.detailsItem.vote_count = this.props.detailsItem.voteCount;
     this.props.detailsItem.type = this.props.mediaType;
+    const newGenres = [];
 
+    this.props.detailsItem.genres.forEach(genre => {
+      if (genreSplit[genre.name]) {
+        newGenres.push(...genreSplit[genre.name]);
+      } else {
+        newGenres.push(genre);
+      }
+    })
+    this.props.detailsItem.genres = newGenres;
+    this.props.detailsItem.date = (this.props.mediaType === "movie") ? this.props.detailsItem.date : this.props.detailsItem.first_air_date;
 
 
     Promise.all([this.props.createInterest(this.props.detailsItem)]).then(() => {

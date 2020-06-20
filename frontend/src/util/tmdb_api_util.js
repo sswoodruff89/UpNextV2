@@ -20,11 +20,11 @@ export const getMediaInfo = function(id, type) {
   return instance.get(`https://api.themoviedb.org/3/${type}/${id}?api_key=${tmdbApiKey}`)
 }
 
-export const getSimilarRecommendations = function(id) {
-  return instance.get(`https://api.themoviedb.org/3/movie/${id}/similar?api_key=${tmdbApiKey}`);
+export const getSimilarRecommendations = function(id, type) {
+  return instance.get(`https://api.themoviedb.org/3/${type}/${id}/similar?api_key=${tmdbApiKey}`);
 };
 
-export const getAllRecommendations = function (genreIds, sliceNum = 3, joinType="%2C") {
+export const getAllRecommendations = function (genreIds, type, sliceNum = 3, joinType="%2C") {
   // put API docs URL
   // test out include_video
   let release_date = new Date(Date.now()).toISOString().split("T")[0];
@@ -34,7 +34,7 @@ export const getAllRecommendations = function (genreIds, sliceNum = 3, joinType=
   if (genreIds.length === 0) genres = 999999999;
     return instance
     .get(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${tmdbApiKey}` +
+      `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
       `&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false` + 
       `&page=1&release_date.lte=${release_date}&vote_count.gte=100&vote_average.gte=5` + 
       `&with_genres=${genres}`
@@ -50,7 +50,7 @@ export const getAllRecommendations = function (genreIds, sliceNum = 3, joinType=
         let page = Math.floor(Math.random() * Math.min(9,totalPages)) + 1;
         return instance
           .get(
-            `https://api.themoviedb.org/3/discover/movie?api_key=${tmdbApiKey}` +
+            `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
           `&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false` + 
           `&page=${page}&release_date.lte=${release_date}&vote_count.gte=100&vote_average.gte=5` + 
           `&with_genres=${genres}`
@@ -83,6 +83,30 @@ const shuffleArray = (array) => {
   return array;
 };
 
+export const hasValidFields = media => {
+  if (media.type === "movie") {
+    if (media.title === "" || media.title === null) return false;
+    if (media.poster_path === "" || media.poster_path === null) return false;
+    if (media.vote_average === null) return false;
+    if (media.vote_count === null) return false;
+    if (media.release_date === "" || media.release_date === null) return false;
+    if (media.runtime === null) return false;
+    if (media.genres === null || media.genres.length === 0) return false;
+    if (media.overview === "" || media.overview === null) return false;
+    return true;
+  } else {
+    if (media.name === "" || media.name === null) return false;
+    if (media.poster_path === "" || media.poster_path === null) return false;
+    if (media.vote_average === null) return false;
+    if (media.vote_count === null) return false;
+    if (media.seasons === null || media.seasons.length === 0) return false;
+    if (media.first_air_date === "" || media.first_air_date === null) return false;
+    if (media.runtime === null) return false;
+    if (media.genres === null || media.genres.length === 0) return false;
+    if (media.overview === "" || media.overview === null) return false;
+    return true;
+  }
+}
 
 export const hasValidMovieFields = movie => {
   if (movie.title === "" || movie.title === null) return false;
