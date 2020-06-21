@@ -66,8 +66,8 @@ class Interests extends React.Component {
       let promiseDExpected = 10;
       // Pull out random 3 superLiked-tier genres, joined by AND
 
-      console.time("allRec");
-      console.log(".................................");
+      // console.time("allRec");
+      // console.log(".................................");
 
 
       const type = (this.props.mediaType === "movie") ? "Movie" : "TV"

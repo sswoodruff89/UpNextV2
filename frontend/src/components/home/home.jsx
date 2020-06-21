@@ -12,11 +12,11 @@ const Home = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-      console.time("newGenreTime");
-      console.log("............................");
+      // console.time("newGenreTime");
+      // console.log("............................");
     dispatch(fetchGenres()).then(() => {
-      console.timeEnd("newGenreTime");
-      console.log("............................");
+      // console.timeEnd("newGenreTime");
+      // console.log("............................");
      });
   }, [])
 
