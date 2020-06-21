@@ -60,7 +60,6 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
           if (interest) {
             return res.status(400).json({ title: "You have already added this tv show" });
           } else {
-            // console.log(req.body.genres);
             const newInterest = new TVInterest({
               user: req.user.id,
               mediaId: req.body.id,
@@ -71,7 +70,7 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
               type: req.body.type,
               poster: req.body.poster_path,
               overview: req.body.overview,
-              seasons: Object.values(req.body.seasons).length,
+              seasons: req.body.number_of_seasons,
               voteAverage: req.body.vote_average,
               voteCount: req.body.vote_count
             });
@@ -95,7 +94,6 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
 
 router.delete(`/:interestId`, passport.authenticate('jwt', {session: false}), (req, res) => {
   let currInterestId;
-  // console.log(req.body);
   if (req.body.type === "movie") {
     MovieInterest.findOne({ _id: req.params.interestId })
       .then(interest => {

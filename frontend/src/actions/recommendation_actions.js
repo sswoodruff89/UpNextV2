@@ -7,7 +7,17 @@ export const START_LOADING_SIMILAR_RECOMMENDATIONS = "START_LOADING_SIMILAR_RECO
 export const START_LOADING_ALL_RECOMMENDATIONS = "START_LOADING_ALL_RECOMMENDATIONS";
 export const END_LOADING_ALL_RECOMMENDATIONS = "END_LOADING_ALL_RECOMMENDATIONS";
 
+let ALL_RECOMMENDATIONS_RECEIVED = false;
 
+export const allRecsReceived = () => {
+  if (!ALL_RECOMMENDATIONS_RECEIVED) {
+    ALL_RECOMMENDATIONS_RECEIVED = true;
+
+    const allRecTimeout = setTimeout(() => {
+      ALL_RECOMMENDATIONS_RECEIVED = false
+    }, 2000)
+  }
+}
 
 
 ///////FOR LOADING
@@ -62,7 +72,10 @@ export const createAllRecommendations = data => dispatch => {
   // }, 1500);
   
   return RecommendationAPIUtil.createAllRecommendations(data).then(res => {
-    dispatch(receiveAllRecommendations(res.data));
+    // if (!ALL_RECOMMENDATIONS_RECEIVED) {
+      dispatch(receiveAllRecommendations(res.data));
+      allRecsReceived();
+    // }
   });
 };
 

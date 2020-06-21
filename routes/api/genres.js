@@ -21,9 +21,6 @@ const tierEvaluator = (currUserId, newGenre, mediaType) => {
       countPromises = [
         MovieInterest.countDocuments({ user: currUserId }).then((count) => {
           const tierRatio = newGenre.movieCount / count;
-          // console.log(newGenre.count);
-          // console.log(newGenre.movieCount);
-          // console.log(count);
 
           if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
             newGenre.tier = "superLike";
@@ -60,9 +57,7 @@ const tierEvaluator = (currUserId, newGenre, mediaType) => {
 };
 
 const tierEvaluator2 = (genreCount, count) => {
-  // console.log(genreCount);
-  // console.log(count);
-  // console.log("--------------")
+
   const tierRatio = genreCount / count;
 
   if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {

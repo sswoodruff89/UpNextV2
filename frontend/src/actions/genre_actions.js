@@ -6,7 +6,6 @@ export const RECEIVE_GENRE = "RECEIVE_GENRE";
 // export const UPDATE_GENRE = "UPDATE_GENRE";
 
 // export const receiveGenres = genres => {
-//   debugger
 //   return {
 //   type: RECEIVE_GENRES,
 //   genres

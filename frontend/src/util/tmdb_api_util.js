@@ -30,32 +30,61 @@ export const getAllRecommendations = function (genreIds, type, sliceNum = 3, joi
   let release_date = new Date(Date.now()).toISOString().split("T")[0];
   let genres = shuffleArray(genreIds).slice(0,sliceNum).join(joinType);
   let totalPages;
-
-  if (genreIds.length === 0) genres = 999999999;
-    return instance
-    .get(
-      `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
-      `&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false` + 
-      `&page=1&release_date.lte=${release_date}&vote_count.gte=100&vote_average.gte=5` + 
-      `&with_genres=${genres}`
-      )
-      .then(response => {
-        if (response.data.total_pages >= 1) {
-          totalPages = parseInt(response.data.total_pages)-1;
-        } else {
-          totalPages = 1;
-        }
-      })
-      .then(() => {
-        let page = Math.floor(Math.random() * Math.min(9,totalPages)) + 1;
-        return instance
+  if (type === 'movie') {
+    if (genreIds.length === 0) genres = 999999999;
+      return instance
+      .get(
+        `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
+        `&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false` + 
+        `&page=1&release_date.lte=${release_date}&vote_count.gte=100&vote_average.gte=5` + 
+        `&with_genres=${genres}`
+        )
+        .then(response => {
+          if (response.data.total_pages >= 1) {
+            totalPages = parseInt(response.data.total_pages)-1;
+          } else {
+            totalPages = 1;
+          }
+        })
+        .then(() => {
+          let page = Math.floor(Math.random() * Math.min(9,totalPages)) + 1;
+          return instance
+            .get(
+              `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
+            `&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false` + 
+            `&page=${page}&release_date.lte=${release_date}&vote_count.gte=100&vote_average.gte=5` + 
+            `&with_genres=${genres}`
+            );
+        });
+        
+      } else {
+        if (genreIds.length === 0) genres = 999999999;
+          return instance
           .get(
             `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
-          `&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false` + 
-          `&page=${page}&release_date.lte=${release_date}&vote_count.gte=100&vote_average.gte=5` + 
-          `&with_genres=${genres}`
-          );
-      });
+            `&language=en-US&sort_by=popularity.desc` +
+            `&page=1` +
+            `&with_genres=${genres}`
+            )
+            .then(response => {
+              if (response.data.total_pages >= 1) {
+                totalPages = parseInt(response.data.total_pages)-1;
+              } else {
+                totalPages = 1;
+              }
+            })
+            .then(() => {
+              let page = Math.floor(Math.random() * Math.min(9,totalPages)) + 1;
+              return instance
+                .get(
+                  `https://api.themoviedb.org/3/discover/${type}?api_key=${tmdbApiKey}` +
+                  `&language=en-US&sort_by=popularity.desc` +
+                  `&page=${page}` +
+                  `&with_genres=${genres}`
+                );
+            });
+
+  }
 };
 
 export const getMovieSuggestions = function(keyword) {
@@ -125,7 +154,7 @@ export const hasValidTVFields = tvShow => {
   if (tvShow.poster_path === "" || tvShow.poster_path === null) return false;
   if (tvShow.vote_average === null) return false;
   if (tvShow.vote_count === null) return false;
-  if (tvShow.seasons === null || tvShow.seasons.length === 0) return false;
+  if (!tvShow.number_of_seasons) return false;
   if (tvShow.first_air_date === "" || tvShow.first_air_date === null) return false;
   if (tvShow.runtime === null) return false;
   if (tvShow.genres === null || tvShow.genres.length === 0) return false;

@@ -20,37 +20,38 @@ class Interests extends React.Component {
     ///////
     //Store recommendations to shorten runtime?
     ///
-    ////
+    ////if (prevProps.mediaType !== this.props.mediaType 
+    // if (isEmpty(this.props.interests)) this.forceUpdate();
+
+    if (prevProps.mediaType !== this.props.mediaType) {
+
+      this.props.fetchInterests(this.props.mediaType)
+        .then(e => this.forceUpdate());
+    }
 
     if (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres)) {
     // if (Object.keys(prevProps.interests).length !== Object.keys(this.props.interests).length) {
       const { genres, interests, mediaType } = this.props;
-      // Object.values(genres).forEach(genre => {
-      //   this.props.updateGenre(genres[genre.name]._id, {
-      //     value: 0,
-      //     mediaType
-      //   });
-      // });
 
       this.props.updateGenres("genreIds", {mediaType});
 
-
-      // Object.values(genres).forEach(genre => {
-      //   this.props.updateGenre(genres[genre.name]._id, { value: 0 });
-      // });
-      // { value: 1, interestCount: Object.keys(mediaIds).length, mediaType}
-    // without checking if the previous genres were not empty, we see a split second of the default API call where
-      // genreIds is an empty arr and TMDB returns a default results response, because initially the genres slice of
-      // state is empty
     }
     
-    if (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres) && !isEmpty(this.props.genres) && !isEmpty(this.props.interests)) {
+    if (prevProps.mediaType !== this.props.mediaType || (JSON.stringify(prevProps.interests) !== JSON.stringify(this.props.interests)) || (JSON.stringify(prevProps.genres) !== JSON.stringify(this.props.genres) && !isEmpty(this.props.genres) && !isEmpty(this.props.interests))) {
       // filter genre slice of state to get superlike genre array
       // call getAllRecommendations'
       let mixLikeArr = [];
       // Only set superLikeArr if we have at least 3 superLiked-tier genres
-      let checkSuperLikeArr = Object.values(this.props.genres).filter(ele => ele.tier === "superLike").map(el => el.id);
-      let checkLikeArr = Object.values(this.props.genres).filter(ele => ele.tier === "like").map(el => el.id);
+      let checkSuperLikeArr = [];
+      let checkLikeArr = [];
+
+      Object.values(this.props.genres).forEach(genre => {
+        if (genre[`${this.props.mediaType}Tier`] === 'superLike') {
+          checkSuperLikeArr.push(genre.id);
+        } else if (genre[`${this.props.mediaType}Tier`] === 'like') {
+          checkLikeArr.push(genre.id);
+        }
+      });
       if (checkSuperLikeArr.length >= 3) mixLikeArr = checkSuperLikeArr;
       
       this.props.startLoadingAll();
@@ -86,7 +87,7 @@ class Interests extends React.Component {
                   if (type === "Movie") {
                     recommendation.runtime = media.data.runtime;
                   } else {
-                    recommendation.seasons = media.data.seasons;
+                    recommendation.seasons = media.data.number_of_seasons;
                   }
                   recommendations.push(recommendation);
                 }
@@ -109,10 +110,6 @@ class Interests extends React.Component {
 
               if ( checkSuperLikeArr.length >= 2 ) {
                 mixLikeArr = checkSuperLikeArr;
-              // } else if (checkLikeArr.length >= 1 && checkSuperLikeArr.length >= 1) {
-              //   let randSuperLikeIndex = Math.floor(Math.random() * (checkSuperLikeArr.length-1));
-              //   let randLikeIndex = Math.floor(Math.random() * (checkLikeArr.length-1));
-              //   mixLikeArr = [].push(checkSuperLikeArr[randSuperLikeIndex],checkLikeArr[randLikeIndex]);
               } else {
                 mixLikeArr = [];
               }
@@ -137,7 +134,7 @@ class Interests extends React.Component {
                             if (type === "Movie") {
                               recommendation.runtime = media.data.runtime;
                             } else {
-                              recommendation.seasons = media.data.seasons;
+                              recommendation.seasons = media.data.number_of_seasons;
                             }
                             recommendations.push(recommendation);
                           }
@@ -187,7 +184,7 @@ class Interests extends React.Component {
                                     if (type === "Movie") {
                                       recommendation.runtime = media.data.runtime;
                                     } else {
-                                      recommendation.seasons = media.data.seasons;
+                                      recommendation.seasons = media.data.number_of_seasons;
                                     }
                                     recommendations.push(recommendation);
                                   }
@@ -225,7 +222,7 @@ class Interests extends React.Component {
                                             if (type === "Movie") {
                                               recommendation.runtime = media.data.runtime;
                                             } else {
-                                              recommendation.seasons = media.data.seasons;
+                                              recommendation.seasons = media.data.number_of_seasons;
                                             }
                                             recommendations.push(recommendation);
                                           }
@@ -259,7 +256,7 @@ class Interests extends React.Component {
                                                     if (type === "Movie") {
                                                       recommendation.runtime = media.data.runtime;
                                                     } else {
-                                                      recommendation.seasons = media.data.seasons;
+                                                      recommendation.seasons = media.data.number_of_seasons;
                                                     }
                                                     recommendations.push(recommendation);
                                                   }
@@ -326,7 +323,9 @@ class Interests extends React.Component {
   };
 
   render() {
+    
     const {mediaType, interests} = this.props;
+    
     let banner = mediaType[0].toUpperCase() + mediaType.slice(1);
 
     return (
@@ -348,7 +347,7 @@ class Interests extends React.Component {
 const msp = (state, ownProps) => {
   let mediaType = state.ui.mediaType;
   return {
-    interests: state.entities.interests[`${mediaType.toLowerCase()}s`],
+    interests: state.entities.interests[`${mediaType}s`],
     genres: state.entities.genres,
     mediaType
   }

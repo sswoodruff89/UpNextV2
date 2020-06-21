@@ -38,29 +38,39 @@ class Details extends React.Component {
   addInterest(e) {
     e.preventDefault();
     // let id = this.props.detailsItem.movieId;
-    let id = this.props.detailsItem.mediaId;
-    this.props.detailsItem.id = this.props.detailsItem.mediaId;
-    this.props.detailsItem.release_date = this.props.detailsItem.year;
-    this.props.detailsItem.poster_path = this.props.detailsItem.poster;
-    this.props.detailsItem.vote_average = this.props.detailsItem.voteAverage;
-    this.props.detailsItem.vote_count = this.props.detailsItem.voteCount;
-    this.props.detailsItem.type = this.props.mediaType;
+    const { updateGenre, createGenre, genres, detailsItem, mediaType } = this.props;
+
+    let id = detailsItem.mediaId;
+    detailsItem.id = detailsItem.mediaId;
+    detailsItem.poster_path = detailsItem.poster;
+    detailsItem.vote_average = detailsItem.voteAverage;
+    detailsItem.vote_count = detailsItem.voteCount;
+    detailsItem.type = mediaType;
     const newGenres = [];
 
-    this.props.detailsItem.genres.forEach(genre => {
+    detailsItem.genres.forEach(genre => {
       if (genreSplit[genre.name]) {
         newGenres.push(...genreSplit[genre.name]);
       } else {
         newGenres.push(genre);
       }
     })
-    this.props.detailsItem.genres = newGenres;
-    this.props.detailsItem.date = (this.props.mediaType === "movie") ? this.props.detailsItem.date : this.props.detailsItem.first_air_date;
+    
+    
+    detailsItem.genres = newGenres;
+    if (mediaType === "movie") {
+      detailsItem.release_date = detailsItem.year;
+    } else {
+      detailsItem.number_of_seasons = detailsItem.seasons;
+      detailsItem.first_air_date = detailsItem.year;
+      detailsItem.name = detailsItem.title;
+    }
 
+    detailsItem.release_date = (mediaType === "movie") ? detailsItem.release_date : detailsItem.first_air_date;
+    // this.props.detailsItem.seasons = this.
 
-    Promise.all([this.props.createInterest(this.props.detailsItem)]).then(() => {
+    Promise.all([this.props.createInterest(detailsItem)]).then(() => {
       // genres calculation
-      const {updateGenre, createGenre, genres, detailsItem, mediaType } = this.props;
 
       detailsItem.genres.forEach(genre => {
         if (genres[genre.name]) {
@@ -72,7 +82,7 @@ class Details extends React.Component {
     });
 // 
     // May refactor in the future so that recommendations are made only after and if createInterest and closeModal are successful
-    TMDBAPIUtil.getSimilarRecommendations(id)
+    TMDBAPIUtil.getSimilarRecommendations(id, mediaType)
       .then(response => {
         let count = 0;
         let recommendations = [];
@@ -85,9 +95,9 @@ class Details extends React.Component {
               .then(media => {
                 if (!this.props.mediaIds[media.data.id]) {
                   count += 1;
-
                   recommendation.genres = media.data.genres;
                   recommendation.runtime = media.data.runtime;
+                  recommendation.poster_path = media.data.poster_path;
                   recommendation.type = 'movie';
                   ////REVISE
                   recommendation[`similarMediaId`] = id;
@@ -117,6 +127,7 @@ class Details extends React.Component {
                   recommendation.type = 'tv';
                   ////REVISE
                   recommendation[`similarMediaId`] = id;
+                  recommendation.seasons = media.data.number_of_seasons;
 
                   recommendations.push(recommendation);
                   if (count === 15) this.props.closeModal();
@@ -182,6 +193,7 @@ class Details extends React.Component {
   }
 
   handleDate(date) {
+    if (!date) return;
     let dateArr = date.split("-");
     return `${dateArr[2]} ${this.months[dateArr[1] - 1]} ${dateArr[0]}`;
   }
@@ -226,7 +238,7 @@ class Details extends React.Component {
         })
       );
     }
-
+    // let seasons = (this.props.detailsType === "interests") ? detailsItem.seasons : detailsItem.number_of_seasons;
     return (
       <>
         <div className="close-modal"
