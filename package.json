@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MannanK/UpNext.git"
+    "url": "git+https://github.com/sswoodruff89/UpNextV2.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/MannanK/UpNext/issues"
+    "url": "https://github.com/sswoodruff89/UpNextV2/issues"
   },
-  "homepage": "https://github.com/MannanK/UpNext#readme",
+  "homepage": "https://github.com/sswoodruff89/UpNextV2#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
