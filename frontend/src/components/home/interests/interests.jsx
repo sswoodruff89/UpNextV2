@@ -326,7 +326,7 @@ class Interests extends React.Component {
     
     const {mediaType, interests} = this.props;
     
-    let banner = mediaType[0].toUpperCase() + mediaType.slice(1);
+    let banner = (mediaType === "movie") ? "Movie" : "TV";
 
     return (
       <div className="interests-container">

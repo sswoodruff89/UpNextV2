@@ -154,8 +154,11 @@ class About extends React.Component {
             recommendations are provided based on your most recently watched
             interest, and media is limited to movies. In the future, UpNext will
             take into account all of your interests and provide aggregate
-            recommendations, with media types being expanded to movies, shows,
+            recommendations, with media types being expanded to shows,
             games, and music.
+            <br /><br />
+            UPDATE (6/21/2020)<br />
+            The app now includes querying and cataloging TV show interests and recommendations.
           </div>
           <div className="project-link">
             <a

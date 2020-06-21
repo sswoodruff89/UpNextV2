@@ -27,6 +27,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
 }
 
 .nav-logo-main {
@@ -127,6 +128,12 @@
     z-index: 9;
     // display: block;
   }
+
+  @media (min-width: 900px) {
+    // display: none;
+    opacity: 0;
+  }
+
 }
 
 .nav-buttons-drop-down {
@@ -149,6 +156,9 @@
     transition: transform 200ms ease-out ;
   }
 
+  @media (min-width: 900px) {
+    display: none;
+  }
 }
 
 .nav-buttons-drop-down button {
@@ -212,10 +222,15 @@
   margin-right: 1vw;
 }
 
+.media-button {
+  position: relative;
+  z-index: 1;
+}
+
 .media-button.current {
   background-color: $button-color-hover;
   transition: background-color 200ms ease-out ;
-
+  z-index: 3;
 }
 
 .logout-button:hover, .about-button:hover, .media-button:hover {
