@@ -9,7 +9,7 @@ import { RECEIVE_USER_LOGOUT } from '../../actions/session_actions';
 
 const _initialState = {
   movies: {},
-  tvshows: {}
+  tvs: {}
 }
 
 const InterestsReducer = (state = _initialState, action) => {
@@ -34,7 +34,7 @@ const InterestsReducer = (state = _initialState, action) => {
       return newState;
     case REMOVE_INTEREST:
       // newState = action.interest.data;
-      delete newState[`${action.mediaType}s`][action.interestId];
+      delete newState[`${action.payload.mediaType}s`][action.payload.id];
       return newState;
     case RECEIVE_USER_LOGOUT:
       return {};

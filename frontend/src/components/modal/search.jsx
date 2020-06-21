@@ -2,14 +2,17 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createInterest } from '../../actions/interest_actions';
 import { createSimilarRecommendations, createAllRecommendations } from '../../actions/recommendation_actions';
-import { createGenre, updateGenre } from '../../actions/genre_actions';
+import { createGenre, updateGenre, updateGenres } from '../../actions/genre_actions';
 import * as TMDBAPIUtil from '../../util/tmdb_api_util';
+import genreSplit from '../../util/genre_split_util'
+
 // const keys = require('../../config/keys');
 
 // had to append REACT_APP at the front of the config var in Heroku in order for
 // React to know to embed the var inside process.env
 const debounce = require("lodash.debounce");
 const isEmpty = require("lodash.isempty");
+
 
 class Search extends React.Component {
   constructor(props) {
@@ -73,7 +76,6 @@ class Search extends React.Component {
     } else if (this.props.mediaType === "tv") {
       TMDBAPIUtil.getTVShowSuggestions(keyword).then((response) => {
         let searchResults = response.data.results;
-
         // Removes any search results that are missing metadata like date or poster
         let sanitizedResults = searchResults.reduce((store, entry) => {
           if (
@@ -103,63 +105,151 @@ class Search extends React.Component {
   handleClick(id) {
     return e => {
       e.preventDefault();
-      const {createInterest, updateGenre, createGenre, mediaType} = this.props;
-
-      TMDBAPIUtil.getMovieInfo(id)
-        .then(response => {
+      const {createInterest, updateGenre, updateGenres, createGenre, mediaType} = this.props;
+      
+      TMDBAPIUtil.getMediaInfo(id, mediaType)
+      .then(response => {
+        const newGenres = [];
+        
+        let type = mediaType === "movie" ? "Movie" : "TV";
+          response.data.genres.forEach(genre => {
+            if (genreSplit[genre.name]) {
+              newGenres.push(...genreSplit[genre.name]);
+            } else {
+              newGenres.push(genre);
+            }
+          })
+          response.data.genres = newGenres;
           response.data.type = mediaType;
-          if (TMDBAPIUtil.hasValidMovieFields(response.data)) {
+          response.data.year = (mediaType === "movie") ? response.data.release_date : response.data.first_air_date;
+          
+          if (TMDBAPIUtil[`hasValid${type}Fields`](response.data)) {
              Promise.all([createInterest(response.data, mediaType)]).then(() => {
               // genres calculation
               const { genres, mediaIds, mediaType } = this.props;
+
               response.data.genres.forEach(genre => {
-                if (genres[genre.name]) {
-                  updateGenre(genres[genre.name]._id, { value: 1, interestCount: Object.keys(mediaIds).length, mediaType});
-                } else {
-                  // createGenre({genre, mediaType} );
-                  this.props.createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
-                }
+
+                  
+                  if (genres[genre.name]) {
+                    updateGenre(genres[genre.name]._id, { value: 1, mediaType});
+                  } else {
+                    // createGenre({genre, mediaType} );
+                    this.props.createGenre({genre, mediaType, interestCount: Object.keys(mediaIds).length} );
+                  }
+                // }
               });
+
               this.props.closeModal();
             });
           } else {
             this.props.closeModal();
           }
         });
-
+      
       // May refactor in the future so that recommendations are made only after and if createInterest and closeModal are successful
-      TMDBAPIUtil.getSimilarRecommendations(id)
+      TMDBAPIUtil.getSimilarRecommendations(id, mediaType)
         .then(response => {
+          
           let count = 0;
           let recommendations = [];
-          let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
+          // let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
 
-          const promises = response.data.results.map((recommendation) => {
-            let recId = recommendation.id;
-            return TMDBAPIUtil.getMovieInfo(recId)
-              .then(media => {
-                if (!this.props.mediaIds[media.data.id]) {
-                  count += 1;
-
-                  recommendation.genres = media.data.genres;
-                  recommendation.runtime = media.data.runtime;
-                  ////REVISE
-                  recommendation[`similar${type}Id`] = id;
-
-                  recommendations.push(recommendation);
-                  if (count === 15) this.props.closeModal();
-                }
-              });
-          });
-
-          Promise.all(promises)
-            .then(() => {
-              this.props.createSimilarRecommendations(recommendations);
-              this.props.closeModal();
+          if (this.props.mediaType === "movie") {
+            const promises = response.data.results.map((recommendation) => {
+              
+              let recId = recommendation.id;
+              return TMDBAPIUtil.getMovieInfo(recId)
+                .then(media => {
+                  
+                  if (!this.props.mediaIds[media.data.id]) {
+                    count += 1;
+  
+                    recommendation.genres = media.data.genres;
+                    recommendation.runtime = media.data.runtime;
+                    recommendation.type = 'movie';
+                    ////REVISE
+                    recommendation[`similarMediaId`] = id;
+  
+                    recommendations.push(recommendation);
+                    if (count === 15) this.props.closeModal();
+                  }
+                });
             });
+  
+            Promise.all(promises)
+              .then(() => {
+                this.props.createSimilarRecommendations(recommendations);
+                this.props.closeModal();
+              });
+              
+          } else {
+            
+            const promises = response.data.results.map((recommendation) => {
+              let recId = recommendation.id;
+              return TMDBAPIUtil.getTVInfo(recId)
+              .then(media => {
+                
+                  if (!this.props.mediaIds[media.data.id]) {
+                    count += 1;
+  
+                    recommendation.genres = media.data.genres;
+                    recommendation.runtime = media.data.runtime;
+                    recommendation.seasons = media.data.number_of_seasons;
+
+                    recommendation.type = 'tv';
+                    ////REVISE
+                    recommendation[`similarMediaId`] = id;
+  
+                    recommendations.push(recommendation);
+                    if (count === 15) this.props.closeModal();
+                  }
+                });
+            });
+  
+            Promise.all(promises)
+              .then(() => {
+                this.props.createSimilarRecommendations(recommendations);
+                this.props.closeModal();
+              });
+            
+              
+          }
         });
-    };
-  }
+
+      }
+      // TMDBAPIUtil.getSimilarRecommendations(id)
+      //   .then(response => {
+      //     let count = 0;
+      //     let recommendations = [];
+      //     let type = this.props.mediaType[0].toUpperCase() + this.props.mediaType.slice(1);
+
+      //     const promises = response.data.results.map((recommendation) => {
+      //       let recId = recommendation.id;
+      //       return TMDBAPIUtil.getMovieInfo(recId)
+      //         .then(media => {
+      //           if (!this.props.mediaIds[media.data.id]) {
+      //             count += 1;
+
+      //             recommendation.genres = media.data.genres;
+      //             recommendation.runtime = media.data.runtime;
+      //             ////REVISE
+      //             recommendation[`similar${type}Id`] = id;
+
+      //             recommendations.push(recommendation);
+      //             if (count === 15) this.props.closeModal();
+      //           }
+      //         });
+      //     });
+
+      //     Promise.all(promises)
+      //       .then(() => {
+      //         this.props.createSimilarRecommendations(recommendations);
+      //         this.props.closeModal();
+      //       });
+      //   });
+  };
+  
   
   render() {
     const {searchResults} = this.state;
@@ -169,11 +259,11 @@ class Search extends React.Component {
     let results = !isEmpty(searchResults) ? (
       <ul className="search-results">
         {sorted.map((result, idx) => {
-          let year = result.release_date.slice(0,4);
+          let year = (result.release_date) ? result.release_date.slice(0,4) : result.first_air_date.slice(0, 4);
           return (
             <li onClick={this.handleClick(result.id)} key={idx}>
               <span>
-                {result.title} ({year})
+                {result.title || result.name} ({year})
               </span>
             </li>
           );})}
@@ -221,7 +311,8 @@ const mdp = dispatch => ({
   createSimilarRecommendations: data => dispatch(createSimilarRecommendations(data)),
   createAllRecommendations: data => dispatch(createAllRecommendations(data)),
   createGenre: data => dispatch(createGenre(data)),
-  updateGenre: (genreId, value, mediaType) => dispatch(updateGenre(genreId, value, mediaType))
+  updateGenre: (genreId, value) => dispatch(updateGenre(genreId, value)),
+  updateGenres: (genreIds, value) => dispatch(updateGenres(genreIds, value))
 });
 
 export default connect(msp, mdp)(Search);

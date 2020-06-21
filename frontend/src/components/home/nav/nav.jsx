@@ -2,12 +2,32 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { logout } from '../../../actions/session_actions';
 import { openModal } from '../../../actions/modal_actions';
+import {setMediaType} from "../../../actions/mediaType_actions";
 
 class Nav extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      openNav: false
+    }
+
+    this.handleClick = this.handleClick.bind(this);
+    this.handleDropDown = this.handleDropDown.bind(this);
+  }
+
+  handleClick(type) {
+    if (type === this.props.mediaType) return;
+    this.props.setMediaType(type);
+  }
+
+  handleDropDown(value) {
+    this.setState({ openNav: value });
+  }
 
   render() {
-    const { logout, openModal } = this.props;
-
+    const { logout, openModal, mediaType } = this.props;
+    const { openNav } = this.state;
+ 
     return (
       <nav className="nav-container">
         <div className="nav-search">
@@ -50,14 +70,66 @@ class Nav extends React.Component {
             />
           </div>
 
+          {/* DROPDOWN */}
+          <button
+            onClick={(e) => this.handleDropDown(!openNav)}
+            className="drop-down-button"
+          >
+            ☰
+          </button>
+
+
+          <div
+            className={`drop-down-container ${openNav ? "open" : ""}`}
+            onClick={(e) => this.handleDropDown(false)}
+          >
+            <div className={`nav-buttons-drop-down ${openNav ? "open" : ""}`}>
+              <button
+                tabIndex="-1"
+                className={`media-button ${mediaType === 'movie' ? 'current' : ''}`}
+                onClick={(e) => this.handleClick("movie")}
+
+              >
+                Movies
+              </button>
+              <button tabIndex="-1"
+                className={`media-button ${mediaType === 'tv' ? 'current' : ''}`}
+                onClick={(e) => this.handleClick("tv")}
+              >
+                TV Shows
+              </button>
+
+              <hr></hr>
+
+              <button
+                tabIndex="-1"
+                className="about-button"
+                onClick={() => openModal({ type: "about" })}
+              >
+                About
+              </button>
+              <button tabIndex="-1" className="logout-button" onClick={logout}>
+                Logout
+              </button>
+
+            </div>
+
+          </div>
+          {/* ----------- */}
+
           <div className="nav-media-toggle">
             <button
               tabIndex="-1"
-              className="about-button"
+              className={`media-button ${mediaType === 'movie' ? 'current' : ''}`}
+              onClick={(e) => this.handleClick("movie")}
+
             >
               Movies
             </button>
-            <button tabIndex="-1" className="logout-button" >
+            <button tabIndex="-1" 
+              className={`media-button ${mediaType === 'tv' ? 'current' : ''}` }
+              onClick={(e) => this.handleClick("tv")}
+>
               TV Shows
             </button>{" "}
           </div>
@@ -80,15 +152,16 @@ class Nav extends React.Component {
   }
 }
 
-// const msp = state => {
-//   return {
-//     mediaType: state.ui.mo
-//   }
-// }
+const msp = state => {
+  return {
+    mediaType: state.ui.mediaType
+  }
+}
 
 const mdp = dispatch => ({
   logout: () => dispatch(logout()),
-  openModal: modal => dispatch(openModal(modal))
+  openModal: modal => dispatch(openModal(modal)),
+  setMediaType: mediaType => dispatch(setMediaType(mediaType))
 });
 
-export default connect(null, mdp)(Nav);
+export default connect(msp, mdp)(Nav);

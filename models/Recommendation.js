@@ -11,6 +11,10 @@ const RecommendationSchema = new Schema({
     ref: "Interest",
     default: null
   },
+  similarMediaId: {
+    type: Number,
+    default: null
+  },
   similarMovieId: {
     type: Number,
     default: null
@@ -32,6 +36,10 @@ const RecommendationSchema = new Schema({
     required: true
   },
   movieId: {
+    type: Number,
+    required: true
+  },
+  mediaId: {
     type: Number,
     required: true
   },
@@ -57,7 +65,11 @@ const RecommendationSchema = new Schema({
   },
   runtime: {
     type: Number,
-    required: true
+    default: null
+  },
+  seasons: {
+    type: Number,
+    default: null
   }
 });
 

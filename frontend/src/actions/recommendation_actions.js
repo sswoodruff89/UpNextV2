@@ -7,7 +7,17 @@ export const START_LOADING_SIMILAR_RECOMMENDATIONS = "START_LOADING_SIMILAR_RECO
 export const START_LOADING_ALL_RECOMMENDATIONS = "START_LOADING_ALL_RECOMMENDATIONS";
 export const END_LOADING_ALL_RECOMMENDATIONS = "END_LOADING_ALL_RECOMMENDATIONS";
 
+let ALL_RECOMMENDATIONS_RECEIVED = false;
 
+export const allRecsReceived = () => {
+  if (!ALL_RECOMMENDATIONS_RECEIVED) {
+    ALL_RECOMMENDATIONS_RECEIVED = true;
+
+    const allRecTimeout = setTimeout(() => {
+      ALL_RECOMMENDATIONS_RECEIVED = false
+    }, 2000)
+  }
+}
 
 
 ///////FOR LOADING
@@ -62,27 +72,35 @@ export const createAllRecommendations = data => dispatch => {
   // }, 1500);
   
   return RecommendationAPIUtil.createAllRecommendations(data).then(res => {
-    dispatch(receiveAllRecommendations(res.data));
+    // if (!ALL_RECOMMENDATIONS_RECEIVED) {
+      dispatch(receiveAllRecommendations(res.data));
+      allRecsReceived();
+    // }
   });
 };
 
-export const fetchSimilarRecommendations = () => dispatch => {
+export const fetchSimilarRecommendations = mediaType => dispatch => {
   dispatch(startLoadingSimilar());
 
-  RecommendationAPIUtil.fetchSimilarRecommendations().then(res => {
+  RecommendationAPIUtil.fetchSimilarRecommendations(mediaType).then(res => {
     dispatch(receiveSimilarRecommendations(res.data));
   });
 };
 
 ///MAY NOT NEED THIS////
-export const fetchAllRecommendations = () => dispatch => {
+export const fetchAllRecommendations = (mediaType) => dispatch => {
   dispatch(startLoadingAll());
 
 
-  RecommendationAPIUtil.fetchAllRecommendations().then(res => {
+  RecommendationAPIUtil.fetchAllRecommendations(mediaType).then(res => {
     dispatch(receiveAllRecommendations(res.data));
   });
 };
+
+export const deleteSimilarRecommendations = () => dispatch => {
+  return RecommendationAPIUtil.deleteSimilarRecommendations().then(res => {
+    dispatch(receiveSimilarRecommendations(res.data));
+  });}
 
 export const deleteAllRecommendations = () => dispatch => {
   return RecommendationAPIUtil.deleteAllRecommendations().then(res => {

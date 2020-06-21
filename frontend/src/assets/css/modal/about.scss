@@ -49,7 +49,7 @@ section.about-container {
     width: 450px;  
     padding: 20px;
     padding-top: 15px;
-    height: 560px;
+    height: 50vh;
   }
 }
 
@@ -187,12 +187,12 @@ li.about-teammember > * {
   @media only screen and (min-device-width: 320px) 
   and (max-device-width: 812px) and (orientation: landscape) {
     width: 90%;
-    max-height: 240px;
+    max-height: 40%;
   }
 
   @media (min-width: 900px) {
     font-size: 18px;
-    max-height: 260px;
+    max-height: 42%;
   }
 }
 

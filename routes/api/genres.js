@@ -15,23 +15,59 @@ const TIER_THRESHOLD = {
 };
 
 // Evaluates the preference tier of a genre depending on weighted threshold values
-const tierEvaluator = (currUserId, newGenre, interestCount) => {
-  let countPromises = [
-    Interest.countDocuments({ user: currUserId }).then(count => {
-      const tierRatio = newGenre.count / (count);
-      if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
-        newGenre.tier = 'superLike';
-      } else if (tierRatio > TIER_THRESHOLD.LIKE) {
-        newGenre.tier = 'like';
-      } else {
-        newGenre.tier = 'low';
-      }
-    })
-  ];
+const tierEvaluator = (currUserId, newGenre, mediaType) => {
+  let countPromises;
+  if (mediaType === "movie") {
+      countPromises = [
+        MovieInterest.countDocuments({ user: currUserId }).then((count) => {
+          const tierRatio = newGenre.movieCount / count;
+
+          if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
+            newGenre.tier = "superLike";
+            newGenre.movieTier = "superLike";
+          } else if (tierRatio > TIER_THRESHOLD.LIKE) {
+            newGenre.tier = "like";
+            newGenre.movieTier = "like";
+          } else {
+            newGenre.tier = "low";
+            newGenre.movieTier = "low";
+          }
+        }),
+      ];
+  } else {
+    countPromises = [
+      TVInterest.countDocuments({ user: currUserId }).then(count => {
+        const tierRatio = newGenre.tvCount / (count);
+          if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
+            newGenre.tier = "superLike";
+            newGenre.tvTier = "superLike";
+          } else if (tierRatio > TIER_THRESHOLD.LIKE) {
+            newGenre.tier = "like";
+            newGenre.tvTier = "like";
+          } else {
+            newGenre.tier = "low";
+            newGenre.tvTier = "low";
+          }
+      })
+    ];
+
+  }
 
   return Promise.all(countPromises);
 };
 
+const tierEvaluator2 = (genreCount, count) => {
+
+  const tierRatio = genreCount / count;
+
+  if (tierRatio >= TIER_THRESHOLD.SUPERLIKE) {
+    return "superlike";
+  } else if (tierRatio > TIER_THRESHOLD.LIKE) {
+    return "like";
+  } else {
+    return "low";
+  }
+}
 
 router.post("/", passport.authenticate('jwt', { session: false }), (req, res) => {
   Genre.findOne({ user: req.user.id, name: req.body.genre.name })
@@ -51,7 +87,7 @@ router.post("/", passport.authenticate('jwt', { session: false }), (req, res) =>
           movieCount,
           tvCount
         });
-        tierEvaluator(req.user.id, newGenre);
+        tierEvaluator(req.user.id, newGenre, req.body.mediaType);
         setTimeout(() => {newGenre.save()
           .then(genre => res.json(genre))
           .catch(err => console.log(err));
@@ -68,11 +104,12 @@ router.patch("/:genreId", passport.authenticate('jwt', { session: false }), (req
         return res.status(400).json({ title: "No genre found" });
       } else {
         
-        const {value, mediaType} = req.body;
-        genre.count += value;
-        (mediaType === "movie") ? genre.movieCount += value : genre.tvCount += value;
-
-      Promise.all([tierEvaluator(req.user.id, genre, req.body.interestCount)]).then(() => {
+        const {value, interestCount, mediaType} = req.body;
+        genre.count = Math.max(genre.count + value, 0);
+        // (mediaType === "movie") ? genre.movieCount = Math.max(genre.count + value, 0) : genre.tvCount = Math.max(genre.count + value, 0);
+        (mediaType === "movie") ? genre.movieCount = Math.max(genre.movieCount + value, 0) : genre.tvCount = Math.max(genre.tvCount + value, 0);
+        
+      Promise.all([tierEvaluator(req.user.id, genre, mediaType)]).then(() => {
         genre.save()
           .then(genre => res.json(genre))
           .catch(err => console.log(err));
@@ -81,5 +118,73 @@ router.patch("/:genreId", passport.authenticate('jwt', { session: false }), (req
     });
   }
 );
+
+
+router.patch("/", passport.authenticate('jwt', { session: false }), (req, res) => {
+
+  if (req.body.data.mediaType === "movie") {
+    Genre.find({ user: req.user.id })
+    .then(genres => {
+        MovieInterest.countDocuments({ user: req.user.id })
+          .then(count => {
+                genres.forEach(genre => {
+                  Genre.updateOne({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), movieTier: tierEvaluator2(genre.movieCount, count) } }])
+                    .catch(err => console.error(`Failed to update ${genre.name}`));
+                })
+          })
+            .then(() => {
+              Genre.find({user: req.user.id})
+                .then(genres => {
+                  return res.json(genres);
+                })
+            })
+          .catch(err => console.error(`Failed to update genres`));
+        });
+  
+  } else {
+    Genre.find({ user: req.user.id })
+      .then(genres => {
+        TVInterest.countDocuments({ user: req.user.id })
+          .then(count => {
+            genres.forEach(genre => {
+              Genre.updateOne({ _id: genre._id }, [{ $set: { tier: tierEvaluator2(genre.count, count), tvTier: tierEvaluator2(genre.tvCount, count) } }])
+                .catch(err => console.error(`Failed to update ${genre.name}`));
+            })
+          })
+          .then(() => {
+            Genre.find({ user: req.user.id })
+              .then(genres => {
+                return res.json(genres);
+              })
+          })
+          .catch(err => console.error(`Failed to update genres`));
+      });
+    }
+  }
+
+);
+
+// router.patch("/", passport.authenticate('jwt', { session: false }), (req, res) => {
+//   Genre.findOne({ user: req.user.id, _id: { $in: req.body.genreIds} })
+//     .then(genres => {
+//       if (!genres.length) {
+//         return res.status(400).json({ title: "No genres found" });
+//       } else {
+//         genres.forEach(genre => {
+//           const {value, mediaType} = req.body.data;
+//           genre.count += value;
+//           (mediaType === "movie") ? genre.movieCount += value : genre.tvCount += value;
+          
+//           Promise.all([tierEvaluator(req.user.id, genre, mediaType)]).then(() => {
+//             genre.save()
+
+//           }).then(genres => res.json(genres))
+//             .catch(err => console.log(err));
+
+//         })
+//       }
+//     });
+//   }
+// );
 
 module.exports = router;
