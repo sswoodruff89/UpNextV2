@@ -4,7 +4,7 @@
 
 [logo]: https://raw.githubusercontent.com/MannanK/UpNext/master/frontend/src/assets/images/logo_3.png "UpNext Logo"
 
-## [**_Link to UpNext (best viewed on mobile)_**](https://upnext-aa.herokuapp.com/)
+## [**_Link to UpNext (best viewed on mobile)_**](https://upnext-2v.herokuapp.com/)
 
 ### Team Members
 
